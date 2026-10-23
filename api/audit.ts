@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from '@google/genai';
+import { GoogleGenAI, ThinkingLevel, Type } from '@google/genai';
 
 export interface SubScores {
   visual_clarity: number;
@@ -767,7 +767,12 @@ export default async function handler(req: any, res: any) {
     }
   }
 
-  const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+  const apiKey =
+    process.env.GEMINI_API_KEY ||
+    process.env.VITE_GEMINI_API_KEY ||
+    process.env.GOOGLE_API_KEY ||
+    process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
+    process.env.API_KEY;
   const isCustomUserAudit = !presetId || !String(presetId).trim();
 
   if (!apiKey || apiKey === 'MY_GEMINI_API_KEY') {
@@ -830,7 +835,12 @@ export default async function handler(req: any, res: any) {
 
     parts.push({ text: contextLines });
 
-    const candidateModels = ['gemini-2.5-flash', 'gemini-2.5-pro'];
+    const candidateModels = [
+      'gemini-3.5-flash-lite',
+      'gemini-3.1-flash-lite',
+      'gemini-3.8-flash',
+      'gemini-2.5-flash',
+    ];
     let response = null;
     let usedModel = candidateModels[0];
     let lastModelError: unknown = null;
@@ -838,6 +848,8 @@ export default async function handler(req: any, res: any) {
     for (const modelName of candidateModels) {
       try {
         usedModel = modelName;
+        const supportsMinimalThinking =
+          modelName === 'gemini-3.5-flash-lite' || modelName === 'gemini-3.1-flash-lite';
         response = await ai.models.generateContent({
           model: modelName,
           contents: { parts },
@@ -846,6 +858,9 @@ export default async function handler(req: any, res: any) {
             responseMimeType: 'application/json',
             responseSchema: auditResponseSchema,
             temperature: 0.3,
+            ...(supportsMinimalThinking
+              ? { thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL } }
+              : {}),
           },
         });
         break;
