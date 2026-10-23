@@ -41,7 +41,7 @@ async function startServer() {
     });
   });
 
-  app.post('/api/audit', async (req, res) => {
+  app.all('/api/audit', async (req, res) => {
     await auditHandler(req, res);
   });
 
