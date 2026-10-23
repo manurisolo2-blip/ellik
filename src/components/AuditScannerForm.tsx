@@ -75,7 +75,15 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/audit', {
+      const primaryEndpoint =
+        typeof window !== 'undefined' &&
+        window.location.hostname === 'localhost' &&
+        window.location.port &&
+        window.location.port !== '3000'
+          ? 'http://localhost:3000/api/audit'
+          : '/api/audit';
+
+      let response = await fetch(primaryEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -86,6 +94,27 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
           mimeType: imageMimeType,
         }),
       });
+
+      // Fallback if relative /api/audit returned 404 in dev
+      if (
+        !response.ok &&
+        response.status === 404 &&
+        primaryEndpoint === '/api/audit' &&
+        typeof window !== 'undefined' &&
+        window.location.hostname === 'localhost'
+      ) {
+        response = await fetch('http://localhost:3000/api/audit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            platform,
+            storeUrl: storeUrl.trim(),
+            productCopy: productCopy.trim(),
+            imageBase64: imagePreview,
+            mimeType: imageMimeType,
+          }),
+        });
+      }
 
       if (!response.ok) {
         const errPayload = (await response.json().catch(() => null)) as { error?: string } | null;

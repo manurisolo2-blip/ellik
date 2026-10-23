@@ -341,9 +341,30 @@ function buildHeuristicCustomAudit(params: {
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
-  app.use(express.json({ limit: '15mb' }));
+  // CORS middleware for local development (supports both port 3000 and Vite 5173)
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(200);
+    }
+    next();
+  });
+
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+  app.get('/api/health', (_req, res) => {
+    res.json({
+      status: 'ok',
+      engine: 'StoreLevelUp CRO Gemini Vision Engine',
+      port: PORT,
+      timestamp: new Date().toISOString(),
+    });
+  });
 
   app.post('/api/audit', async (req, res) => {
     const {
@@ -453,11 +474,9 @@ async function startServer() {
       parts.push({ text: contextLines });
 
       const candidateModels = [
-        'gemini-3.5-flash',
-        'gemini-3-flash-preview',
-        'gemini-3.1-flash-lite-preview',
-        'gemini-3.8-flash',
         'gemini-2.5-flash',
+        'gemini-3.1-flash-lite-preview',
+        'gemini-2.0-flash',
       ];
       let response = null;
       let usedModel = candidateModels[0];

@@ -438,7 +438,15 @@ export default function App() {
         uploadedImageUrl ||
         report.captured_image_url ||
         (selectedPreset ? generatePresetCanvasBase64(selectedPreset) : '');
-      const res = await fetch('/api/audit', {
+      const primaryEndpoint =
+        typeof window !== 'undefined' &&
+        window.location.hostname === 'localhost' &&
+        window.location.port &&
+        window.location.port !== '3000'
+          ? 'http://localhost:3000/api/audit'
+          : '/api/audit';
+
+      let res = await fetch(primaryEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -450,6 +458,27 @@ export default function App() {
           mimeType: 'image/png',
         }),
       });
+
+      if (
+        !res.ok &&
+        res.status === 404 &&
+        primaryEndpoint === '/api/audit' &&
+        typeof window !== 'undefined' &&
+        window.location.hostname === 'localhost'
+      ) {
+        res = await fetch('http://localhost:3000/api/audit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            platform: activePlatform,
+            storeUrl: activeStoreUrl,
+            productCopy: activeRawCopy,
+            presetId: isCustomAudit ? '' : selectedPreset?.id || '',
+            imageBase64: base64Png.startsWith('data:') ? base64Png : '',
+            mimeType: 'image/png',
+          }),
+        });
+      }
       if (res.ok) {
         const freshReport = (await res.json()) as StoreAuditReport;
         setReport(freshReport);
