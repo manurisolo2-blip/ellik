@@ -147,7 +147,7 @@ test('parseStoreHtmlMetadata and extractStoreHtmlContext extract title, price, o
 });
 
 test('api/audit Vercel serverless handler responds to OPTIONS, rejects GET with 405, and processes POST requests', async () => {
-  const { default: auditHandler } = await import('../../api/audit');
+  const { default: auditHandler } = await import('../../api/audit.js');
 
   const createMockRes = () => {
     const res: any = {

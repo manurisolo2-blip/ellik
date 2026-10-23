@@ -7,7 +7,7 @@ import auditHandler, {
   fetchStorePageMetadata,
   fetchStorePageContext,
   buildHeuristicCustomAudit,
-} from './api/audit';
+} from './api/audit.js';
 
 export { fetchStorePageMetadata, fetchStorePageContext, buildHeuristicCustomAudit };
 

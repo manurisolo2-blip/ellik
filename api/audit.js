@@ -1,57 +1,166 @@
-import { GoogleGenAI, ThinkingLevel, Type } from '@google/genai';
+export const SYSTEM_INSTRUCTION = `Actúa como el motor de inteligencia artificial visual de "StoreLevelUp", un auditor experto en Optimización de Tasa de Conversión (CRO), diseño UI/UX para e-commerce (Shopify, Tiendanube, WooCommerce, MercadoLibre) y psicología de ventas con enfoque gamificado.
 
-export interface SubScores {
-  visual_clarity: number;
-  cta_power: number;
-  trust_and_security: number;
-  copywriting_persuasion: number;
-}
+Tu tarea es inspeccionar píxel por píxel la captura de pantalla subida (y opcionalmente los datos extraídos de la URL o texto proporcionado) para detectar exactamente por qué esa página está perdiendo ventas y cómo solucionarlo rápido.
 
-export interface MissionItem {
-  id: number;
-  title: string;
-  visual_evidence_detected: string;
-  problem_detected: string;
-  sales_impact: string;
-  xp_reward: number;
-  quick_fix_5min: string;
-  x_percent: number;
-  y_percent: number;
-}
+REGLAS OBLIGATORIAS DE ANÁLISIS VISUAL ESTRICTO:
+1. Regla A (Filtro de validez): Si la imagen subida NO es una página de producto, tienda online o landing page comercial (por ejemplo, es una foto casual, un escritorio, un meme o algo sin relación con un e-commerce), debes indicarlo claramente en "summary_verdict" con el formato exacto: "La imagen subida no parece ser una página de producto de e-commerce. Vemos: [descripción real de la imagen]" y dar puntuación 0 en "overall_score" y 0 en todos los "sub_scores".
+2. Regla B (Evidencia literal obligatoria): En cada "problem_detected" y "quick_fix_5min", TIENES PROHIBIDO dar consejos genéricos o inventar elementos que no estén en la imagen. Debes citar entre comillas el texto exacto que lees en la captura (ej. el texto real del botón, el título real, el precio exacto, los colores reales que ves en la foto y qué elementos están arriba o abajo).
+3. Regla C (Coordenadas reales y evidencia visual): Para "x_percent" e "y_percent" (enteros entre 8 y 92), debes localizar la posición real en la imagen subida donde se ve ese elemento específico (0 = borde izquierdo/superior, 50 = centro, 100 = borde derecho/inferior). En "visual_evidence_detected" debes escribir en 1 línea qué elemento visual exacto estás mirando en esas coordenadas de la captura (ej: "Botón azul con texto 'Comprar ahora' debajo del precio $25.000").
+4. EXTRACCIÓN REAL DEL PRODUCTO:
+   - "detected_product_name": El nombre real exacto del producto que lees en la captura o URL (o "No es una página de producto" si aplica la Regla A).
+   - "detected_product_price": El precio real exacto que lees en la captura o URL (ej. "$45.000", "$89.90 USD", o "No visible" si no aparece ningún precio).
+5. Usa un tono directo y motivador estilo videojuego de estrategia/productividad ("Subir de nivel", "Misión", "Fuga de ventas").
+6. CANTIDAD EXACTA DE ELEMENTOS EN EL JSON:
+   - "free_critical_missions" debe contener exactamente 3 elementos (IDs 1, 2 y 3).
+   - "pro_locked_missions" debe contener exactamente 5 elementos (IDs 4, 5, 6, 7 y 8).
+   - "pro_ai_copywriting_pack.optimized_bullet_benefits" debe contener exactamente 3 beneficios persuasivos basados en el producto real detectado.`;
 
-export interface ProAiCopywritingPack {
-  optimized_product_title: string;
-  optimized_bullet_benefits: string[];
-  optimized_cta_button_text: string;
-  trust_guarantee_microcopy: string;
-}
+export const missionSchema = {
+  type: 'OBJECT',
+  properties: {
+    id: { type: 'INTEGER', description: 'ID numérico secuencial de la misión' },
+    title: {
+      type: 'STRING',
+      description: 'Nombre corto y atractivo de la misión basado en el elemento real visto',
+    },
+    visual_evidence_detected: {
+      type: 'STRING',
+      description:
+        "Descripción en 1 línea de qué elemento visual exacto estás mirando en esas coordenadas de la captura (ej: \"Botón azul con texto 'Comprar ahora' debajo del precio $25.000\").",
+    },
+    problem_detected: {
+      type: 'STRING',
+      description:
+        'Explicación exacta de qué está mal citando entre comillas los textos, colores y ubicaciones reales leídos en la captura.',
+    },
+    sales_impact: {
+      type: 'STRING',
+      description: 'Impacto en ventas: Alto, Medio/Alto o Medio',
+    },
+    xp_reward: {
+      type: 'INTEGER',
+      description: 'Puntos de experiencia otorgados al completar la misión (ej. 150, 200)',
+    },
+    quick_fix_5min: {
+      type: 'STRING',
+      description:
+        'Instrucción paso a paso para arreglarlo en 5 minutos haciendo referencia a los textos y colores reales de la captura.',
+    },
+    x_percent: {
+      type: 'INTEGER',
+      description:
+        'Coordenada horizontal real (entero entre 8 y 92, en porcentaje del ancho de la imagen) donde se ubica ese elemento específico en la captura.',
+    },
+    y_percent: {
+      type: 'INTEGER',
+      description:
+        'Coordenada vertical real (entero entre 8 y 92, en porcentaje del alto de la imagen) donde se ubica ese elemento específico en la captura.',
+    },
+  },
+  required: [
+    'id',
+    'title',
+    'visual_evidence_detected',
+    'problem_detected',
+    'sales_impact',
+    'xp_reward',
+    'quick_fix_5min',
+    'x_percent',
+    'y_percent',
+  ],
+};
 
-export type AuditSourceType = 'live_gemini' | 'heuristic_fallback';
+export const auditResponseSchema = {
+  type: 'OBJECT',
+  properties: {
+    overall_score: {
+      type: 'INTEGER',
+      description: 'Puntaje global de 0 a 100',
+    },
+    rank_title: {
+      type: 'STRING',
+      description: 'Rango gamificado actual (ej. Mercader Aprendiz, Artesano de Conversión)',
+    },
+    estimated_lost_sales_percentage: {
+      type: 'STRING',
+      description: 'Porcentaje estimado de ventas perdidas con símbolo %, ej. "28%"',
+    },
+    summary_verdict: {
+      type: 'STRING',
+      description: 'Resumen directo de 2 líneas sobre el estado actual de la página.',
+    },
+    detected_product_name: {
+      type: 'STRING',
+      description: 'El nombre real del producto que se ve en la captura o URL.',
+    },
+    detected_product_price: {
+      type: 'STRING',
+      description: 'El precio real que se ve en la captura o URL (ej. "$45.000" o "No visible").',
+    },
+    sub_scores: {
+      type: 'OBJECT',
+      properties: {
+        visual_clarity: { type: 'INTEGER' },
+        cta_power: { type: 'INTEGER' },
+        trust_and_security: { type: 'INTEGER' },
+        copywriting_persuasion: { type: 'INTEGER' },
+      },
+      required: ['visual_clarity', 'cta_power', 'trust_and_security', 'copywriting_persuasion'],
+    },
+    free_critical_missions: {
+      type: 'ARRAY',
+      items: missionSchema,
+      description: 'Exactamente 3 misiones críticas gratuitas (IDs 1, 2, 3)',
+    },
+    pro_locked_missions: {
+      type: 'ARRAY',
+      items: missionSchema,
+      description: 'Exactamente 5 misiones avanzadas bloqueadas Pro (IDs 4, 5, 6, 7, 8)',
+    },
+    pro_ai_copywriting_pack: {
+      type: 'OBJECT',
+      properties: {
+        optimized_product_title: {
+          type: 'STRING',
+          description: 'Título de producto reescrito y altamente persuasivo listo para copiar y pegar',
+        },
+        optimized_bullet_benefits: {
+          type: 'ARRAY',
+          items: { type: 'STRING' },
+          description: 'Exactamente 3 beneficios enfocados en transformación, objeción y calidad/rapidez',
+        },
+        optimized_cta_button_text: {
+          type: 'STRING',
+          description: 'Texto ideal para el botón de compra',
+        },
+        trust_guarantee_microcopy: {
+          type: 'STRING',
+          description: 'Texto corto de garantía/envío seguro para poner debajo del botón de compra',
+        },
+      },
+      required: [
+        'optimized_product_title',
+        'optimized_bullet_benefits',
+        'optimized_cta_button_text',
+        'trust_guarantee_microcopy',
+      ],
+    },
+  },
+  required: [
+    'overall_score',
+    'rank_title',
+    'estimated_lost_sales_percentage',
+    'summary_verdict',
+    'detected_product_name',
+    'detected_product_price',
+    'sub_scores',
+    'free_critical_missions',
+    'pro_locked_missions',
+    'pro_ai_copywriting_pack',
+  ],
+};
 
-export interface StoreAuditReport {
-  overall_score: number;
-  rank_title: string;
-  estimated_lost_sales_percentage: string;
-  summary_verdict: string;
-  detected_product_name: string;
-  detected_product_price: string;
-  sub_scores: SubScores;
-  free_critical_missions: MissionItem[];
-  pro_locked_missions: MissionItem[];
-  pro_ai_copywriting_pack: ProAiCopywritingPack;
-  audit_source?: AuditSourceType;
-  engine_notes?: string;
-  captured_image_url?: string;
-}
-
-export interface ScrapedStoreMetadata {
-  contextText: string;
-  pageTitle: string;
-  detectedPrice: string;
-  ogImageUrl: string | null;
-}
-
-function getRankTitleForScore(score: number): string {
+function getRankTitleForScore(score) {
   if (score >= 90) return 'Leyenda del Checkout';
   if (score >= 80) return 'Maestro de Conversión';
   if (score >= 70) return 'Mercader Audaz';
@@ -59,8 +168,8 @@ function getRankTitleForScore(score: number): string {
   return 'Mercader Aprendiz';
 }
 
-function stripHtmlTags(htmlFragment: string): string {
-  return htmlFragment
+function stripHtmlTags(htmlFragment) {
+  return String(htmlFragment || '')
     .replace(/<[^>]+>/g, ' ')
     .replace(/&nbsp;/gi, ' ')
     .replace(/&amp;/gi, '&')
@@ -70,7 +179,7 @@ function stripHtmlTags(htmlFragment: string): string {
     .trim();
 }
 
-export function parseStoreHtmlMetadata(html: string, baseUrl = ''): ScrapedStoreMetadata | null {
+export function parseStoreHtmlMetadata(html, baseUrl = '') {
   if (!html || typeof html !== 'string') return null;
 
   const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
@@ -107,9 +216,9 @@ export function parseStoreHtmlMetadata(html: string, baseUrl = ''): ScrapedStore
     html.match(/<meta[^>]+property=["'](?:product|og):price:currency["'][^>]+content=["']([^"']*)["'][^>]*>/i) ||
     html.match(/<meta[^>]+content=["']([^"']*)["'][^>]+property=["'](?:product|og):price:currency["'][^>]*>/i);
 
-  const headings: string[] = [];
+  const headings = [];
   const headingRegex = /<h[12][^>]*>([\s\S]*?)<\/h[12]>/gi;
-  let match: RegExpExecArray | null;
+  let match;
   while ((match = headingRegex.exec(html)) !== null && headings.length < 8) {
     const cleanHeading = stripHtmlTags(match[1]);
     if (cleanHeading) {
@@ -159,13 +268,85 @@ export function parseStoreHtmlMetadata(html: string, baseUrl = ''): ScrapedStore
   };
 }
 
-function normalizeLiveOrFallbackReport(raw: Partial<StoreAuditReport>): StoreAuditReport {
-  const clampScore = (val: unknown, def: number) => {
+export async function fetchStorePageMetadata(url) {
+  const trimmed = String(url || '').trim();
+  if (!trimmed || !/^https?:\/\//i.test(trimmed)) {
+    return null;
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    const response = await fetch(trimmed, {
+      method: 'GET',
+      signal: controller.signal,
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        Accept: 'text/html,application/xhtml+xml',
+      },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const html = await response.text();
+    return parseStoreHtmlMetadata(html, trimmed);
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+export async function fetchStorePageContext(url) {
+  const meta = await fetchStorePageMetadata(url);
+  return meta ? meta.contextText : null;
+}
+
+export async function fetchRemoteImageAsBase64(imageUrl, timeoutMs = 5000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(imageUrl, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        Accept: 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
+      },
+    });
+    if (!res.ok) return null;
+    const contentType = res.headers.get('content-type') || 'image/png';
+    if (!contentType.startsWith('image/')) return null;
+
+    const arrayBuffer = await res.arrayBuffer();
+    if (arrayBuffer.byteLength < 400) return null;
+
+    const base64 = Buffer.from(arrayBuffer).toString('base64');
+    const mimeType = contentType.split(';')[0].trim();
+    return {
+      base64,
+      mimeType,
+      dataUrl: `data:${mimeType};base64,${base64}`,
+    };
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function normalizeLiveOrFallbackReport(raw) {
+  const clampScore = (val, def) => {
     if (typeof val !== 'number' || Number.isNaN(val)) return def;
     return Math.max(0, Math.min(100, Math.round(val)));
   };
 
-  const clampCoord = (val: unknown, def: number) => {
+  const clampCoord = (val, def) => {
     if (typeof val !== 'number' || Number.isNaN(val)) return def;
     return Math.max(8, Math.min(92, Math.round(val)));
   };
@@ -200,17 +381,14 @@ function normalizeLiveOrFallbackReport(raw: Partial<StoreAuditReport>): StoreAud
       ? raw.detected_product_price.trim()
       : 'No visible';
 
-  const sub_scores: SubScores = {
+  const sub_scores = {
     visual_clarity: clampScore(raw.sub_scores?.visual_clarity, 0),
     cta_power: clampScore(raw.sub_scores?.cta_power, 0),
     trust_and_security: clampScore(raw.sub_scores?.trust_and_security, 0),
     copywriting_persuasion: clampScore(raw.sub_scores?.copywriting_persuasion, 0),
   };
 
-  const sanitizeLiveMission = (
-    item: Partial<MissionItem> | undefined,
-    forcedId: number
-  ): MissionItem => ({
+  const sanitizeLiveMission = (item, forcedId) => ({
     id: forcedId,
     title: typeof item?.title === 'string' ? item.title.trim() : '',
     visual_evidence_detected:
@@ -234,22 +412,22 @@ function normalizeLiveOrFallbackReport(raw: Partial<StoreAuditReport>): StoreAud
   });
 
   const rawFree = Array.isArray(raw.free_critical_missions) ? raw.free_critical_missions : [];
-  const free_critical_missions: MissionItem[] = rawFree.map((m, idx) =>
+  const free_critical_missions = rawFree.map((m, idx) =>
     sanitizeLiveMission(m, idx + 1)
   );
 
   const rawPro = Array.isArray(raw.pro_locked_missions) ? raw.pro_locked_missions : [];
-  const pro_locked_missions: MissionItem[] = rawPro.map((m, idx) =>
+  const pro_locked_missions = rawPro.map((m, idx) =>
     sanitizeLiveMission(m, idx + 1 + free_critical_missions.length)
   );
 
   const rawBullets = Array.isArray(raw.pro_ai_copywriting_pack?.optimized_bullet_benefits)
-    ? raw.pro_ai_copywriting_pack!.optimized_bullet_benefits
-        .filter((b): b is string => typeof b === 'string' && b.trim().length > 0)
+    ? raw.pro_ai_copywriting_pack.optimized_bullet_benefits
+        .filter((b) => typeof b === 'string' && b.trim().length > 0)
         .map((b) => b.trim())
     : [];
 
-  const pro_ai_copywriting_pack: ProAiCopywritingPack = {
+  const pro_ai_copywriting_pack = {
     optimized_product_title:
       typeof raw.pro_ai_copywriting_pack?.optimized_product_title === 'string'
         ? raw.pro_ai_copywriting_pack.optimized_product_title.trim()
@@ -265,7 +443,7 @@ function normalizeLiveOrFallbackReport(raw: Partial<StoreAuditReport>): StoreAud
         : '',
   };
 
-  const liveResult: StoreAuditReport = {
+  const liveResult = {
     overall_score,
     rank_title,
     estimated_lost_sales_percentage,
@@ -289,252 +467,7 @@ function normalizeLiveOrFallbackReport(raw: Partial<StoreAuditReport>): StoreAud
   return liveResult;
 }
 
-export const SYSTEM_INSTRUCTION = `Actúa como el motor de inteligencia artificial visual de "StoreLevelUp", un auditor experto en Optimización de Tasa de Conversión (CRO), diseño UI/UX para e-commerce (Shopify, Tiendanube, WooCommerce, MercadoLibre) y psicología de ventas con enfoque gamificado.
-
-Tu tarea es inspeccionar píxel por píxel la captura de pantalla subida (y opcionalmente los datos extraídos de la URL o texto proporcionado) para detectar exactamente por qué esa página está perdiendo ventas y cómo solucionarlo rápido.
-
-REGLAS OBLIGATORIAS DE ANÁLISIS VISUAL ESTRICTO:
-1. Regla A (Filtro de validez): Si la imagen subida NO es una página de producto, tienda online o landing page comercial (por ejemplo, es una foto casual, un escritorio, un meme o algo sin relación con un e-commerce), debes indicarlo claramente en "summary_verdict" con el formato exacto: "La imagen subida no parece ser una página de producto de e-commerce. Vemos: [descripción real de la imagen]" y dar puntuación 0 en "overall_score" y 0 en todos los "sub_scores".
-2. Regla B (Evidencia literal obligatoria): En cada "problem_detected" y "quick_fix_5min", TIENES PROHIBIDO dar consejos genéricos o inventar elementos que no estén en la imagen. Debes citar entre comillas el texto exacto que lees en la captura (ej. el texto real del botón, el título real, el precio exacto, los colores reales que ves en la foto y qué elementos están arriba o abajo).
-3. Regla C (Coordenadas reales y evidencia visual): Para "x_percent" e "y_percent" (enteros entre 8 y 92), debes localizar la posición real en la imagen subida donde se ve ese elemento específico (0 = borde izquierdo/superior, 50 = centro, 100 = borde derecho/inferior). En "visual_evidence_detected" debes escribir en 1 línea qué elemento visual exacto estás mirando en esas coordenadas de la captura (ej: "Botón azul con texto 'Comprar ahora' debajo del precio $25.000").
-4. EXTRACCIÓN REAL DEL PRODUCTO:
-   - "detected_product_name": El nombre real exacto del producto que lees en la captura o URL (o "No es una página de producto" si aplica la Regla A).
-   - "detected_product_price": El precio real exacto que lees en la captura o URL (ej. "$45.000", "$89.90 USD", o "No visible" si no aparece ningún precio).
-5. Usa un tono directo y motivador estilo videojuego de estrategia/productividad ("Subir de nivel", "Misión", "Fuga de ventas").
-6. CANTIDAD EXACTA DE ELEMENTOS EN EL JSON:
-   - "free_critical_missions" debe contener exactamente 3 elementos (IDs 1, 2 y 3).
-   - "pro_locked_missions" debe contener exactamente 5 elementos (IDs 4, 5, 6, 7 y 8).
-   - "pro_ai_copywriting_pack.optimized_bullet_benefits" debe contener exactamente 3 beneficios persuasivos basados en el producto real detectado.`;
-
-export const missionSchema = {
-  type: Type.OBJECT,
-  properties: {
-    id: { type: Type.INTEGER, description: 'ID numérico secuencial de la misión' },
-    title: {
-      type: Type.STRING,
-      description: 'Nombre corto y atractivo de la misión basado en el elemento real visto',
-    },
-    visual_evidence_detected: {
-      type: Type.STRING,
-      description:
-        "Descripción en 1 línea de qué elemento visual exacto estás mirando en esas coordenadas de la captura (ej: \"Botón azul con texto 'Comprar ahora' debajo del precio $25.000\").",
-    },
-    problem_detected: {
-      type: Type.STRING,
-      description:
-        'Explicación exacta de qué está mal citando entre comillas los textos, colores y ubicaciones reales leídos en la captura.',
-    },
-    sales_impact: {
-      type: Type.STRING,
-      description: 'Impacto en ventas: Alto, Medio/Alto o Medio',
-    },
-    xp_reward: {
-      type: Type.INTEGER,
-      description: 'Puntos de experiencia otorgados al completar la misión (ej. 150, 200)',
-    },
-    quick_fix_5min: {
-      type: Type.STRING,
-      description:
-        'Instrucción paso a paso para arreglarlo en 5 minutos haciendo referencia a los textos y colores reales de la captura.',
-    },
-    x_percent: {
-      type: Type.INTEGER,
-      description:
-        'Coordenada horizontal real (entero entre 8 y 92, en porcentaje del ancho de la imagen) donde se ubica ese elemento específico en la captura.',
-    },
-    y_percent: {
-      type: Type.INTEGER,
-      description:
-        'Coordenada vertical real (entero entre 8 y 92, en porcentaje del alto de la imagen) donde se ubica ese elemento específico en la captura.',
-    },
-  },
-  required: [
-    'id',
-    'title',
-    'visual_evidence_detected',
-    'problem_detected',
-    'sales_impact',
-    'xp_reward',
-    'quick_fix_5min',
-    'x_percent',
-    'y_percent',
-  ],
-};
-
-export const auditResponseSchema = {
-  type: Type.OBJECT,
-  properties: {
-    overall_score: {
-      type: Type.INTEGER,
-      description: 'Puntaje global de 0 a 100',
-    },
-    rank_title: {
-      type: Type.STRING,
-      description: 'Rango gamificado actual (ej. Mercader Aprendiz, Artesano de Conversión)',
-    },
-    estimated_lost_sales_percentage: {
-      type: Type.STRING,
-      description: 'Porcentaje estimado de ventas perdidas con símbolo %, ej. "28%"',
-    },
-    summary_verdict: {
-      type: Type.STRING,
-      description: 'Resumen directo de 2 líneas sobre el estado actual de la página.',
-    },
-    detected_product_name: {
-      type: Type.STRING,
-      description: 'El nombre real del producto que se ve en la captura o URL.',
-    },
-    detected_product_price: {
-      type: Type.STRING,
-      description: 'El precio real que se ve en la captura o URL (ej. "$45.000" o "No visible").',
-    },
-    sub_scores: {
-      type: Type.OBJECT,
-      properties: {
-        visual_clarity: { type: Type.INTEGER },
-        cta_power: { type: Type.INTEGER },
-        trust_and_security: { type: Type.INTEGER },
-        copywriting_persuasion: { type: Type.INTEGER },
-      },
-      required: ['visual_clarity', 'cta_power', 'trust_and_security', 'copywriting_persuasion'],
-    },
-    free_critical_missions: {
-      type: Type.ARRAY,
-      items: missionSchema,
-      description: 'Exactamente 3 misiones críticas gratuitas (IDs 1, 2, 3)',
-    },
-    pro_locked_missions: {
-      type: Type.ARRAY,
-      items: missionSchema,
-      description: 'Exactamente 5 misiones avanzadas bloqueadas Pro (IDs 4, 5, 6, 7, 8)',
-    },
-    pro_ai_copywriting_pack: {
-      type: Type.OBJECT,
-      properties: {
-        optimized_product_title: {
-          type: Type.STRING,
-          description: 'Título de producto reescrito y altamente persuasivo listo para copiar y pegar',
-        },
-        optimized_bullet_benefits: {
-          type: Type.ARRAY,
-          items: { type: Type.STRING },
-          description: 'Exactamente 3 beneficios enfocados en transformación, objeción y calidad/rapidez',
-        },
-        optimized_cta_button_text: {
-          type: Type.STRING,
-          description: 'Texto ideal para el botón de compra',
-        },
-        trust_guarantee_microcopy: {
-          type: Type.STRING,
-          description: 'Texto corto de garantía/envío seguro para poner debajo del botón de compra',
-        },
-      },
-      required: [
-        'optimized_product_title',
-        'optimized_bullet_benefits',
-        'optimized_cta_button_text',
-        'trust_guarantee_microcopy',
-      ],
-    },
-  },
-  required: [
-    'overall_score',
-    'rank_title',
-    'estimated_lost_sales_percentage',
-    'summary_verdict',
-    'detected_product_name',
-    'detected_product_price',
-    'sub_scores',
-    'free_critical_missions',
-    'pro_locked_missions',
-    'pro_ai_copywriting_pack',
-  ],
-};
-
-export async function fetchStorePageMetadata(url: string): Promise<ScrapedStoreMetadata | null> {
-  const trimmed = url.trim();
-  if (!trimmed || !/^https?:\/\//i.test(trimmed)) {
-    return null;
-  }
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-  try {
-    const response = await fetch(trimmed, {
-      method: 'GET',
-      signal: controller.signal,
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-        Accept: 'text/html,application/xhtml+xml',
-      },
-    });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    const html = await response.text();
-    return parseStoreHtmlMetadata(html, trimmed);
-  } catch {
-    return null;
-  } finally {
-    clearTimeout(timeoutId);
-  }
-}
-
-export async function fetchStorePageContext(url: string): Promise<string | null> {
-  const meta = await fetchStorePageMetadata(url);
-  return meta ? meta.contextText : null;
-}
-
-export async function fetchRemoteImageAsBase64(
-  imageUrl: string,
-  timeoutMs = 5000
-): Promise<{ base64: string; mimeType: string; dataUrl: string } | null> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    const res = await fetch(imageUrl, {
-      signal: controller.signal,
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-        Accept: 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
-      },
-    });
-    if (!res.ok) return null;
-    const contentType = res.headers.get('content-type') || 'image/png';
-    if (!contentType.startsWith('image/')) return null;
-
-    const arrayBuffer = await res.arrayBuffer();
-    if (arrayBuffer.byteLength < 400) return null;
-
-    const base64 = Buffer.from(arrayBuffer).toString('base64');
-    const mimeType = contentType.split(';')[0].trim();
-    return {
-      base64,
-      mimeType,
-      dataUrl: `data:${mimeType};base64,${base64}`,
-    };
-  } catch {
-    return null;
-  } finally {
-    clearTimeout(timeoutId);
-  }
-}
-
-export function buildHeuristicCustomAudit(params: {
-  platform?: string;
-  storeUrl?: string;
-  productCopy?: string;
-  presetId?: string;
-  scrapedMeta?: ScrapedStoreMetadata | null;
-  capturedImageUrl?: string;
-  engineNotes?: string;
-}): StoreAuditReport {
+export function buildHeuristicCustomAudit(params) {
   const {
     platform = 'Shopify',
     storeUrl = '',
@@ -542,15 +475,15 @@ export function buildHeuristicCustomAudit(params: {
     scrapedMeta,
     capturedImageUrl,
     engineNotes,
-  } = params;
+  } = params || {};
 
-  const cleanCopy = productCopy.trim();
+  const cleanCopy = String(productCopy || '').trim();
   const priceRegex = /(?:US\$|\$|€|ARS|USD|MXN|CLP|COP)\s?\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?/i;
   const copyPriceMatch = cleanCopy.match(priceRegex);
 
-  const urlSlugTitle = storeUrl.trim()
+  const urlSlugTitle = String(storeUrl || '').trim()
     ? decodeURIComponent(
-        storeUrl
+        String(storeUrl)
           .trim()
           .replace(/^https?:\/\//, '')
           .split('/')
@@ -701,7 +634,7 @@ export function buildHeuristicCustomAudit(params: {
   });
 }
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -714,7 +647,7 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Método no permitido. Usa POST /api/audit.' });
   }
 
-  let body: Record<string, any> = {};
+  let body = {};
   if (typeof req.body === 'string') {
     try {
       body = JSON.parse(req.body);
@@ -740,7 +673,7 @@ export default async function handler(req: any, res: any) {
   let effectiveBase64 =
     typeof imageBase64 === 'string' && imageBase64.length > 50 ? imageBase64 : '';
   let effectiveMimeType = mimeType || 'image/jpeg';
-  let capturedImageUrl: string | undefined = undefined;
+  let capturedImageUrl = undefined;
 
   if (!effectiveBase64 && cleanUrl) {
     const thumIoUrl = `https://image.thum.io/get/width/1200/crop/800/noanimate/${cleanUrl}`;
@@ -769,21 +702,20 @@ export default async function handler(req: any, res: any) {
 
   const apiKey =
     process.env.GEMINI_API_KEY ||
+    process.env.API_KEY ||
     process.env.VITE_GEMINI_API_KEY ||
-    process.env.GOOGLE_API_KEY ||
-    process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
-    process.env.API_KEY;
+    process.env.GOOGLE_API_KEY;
+
   const isCustomUserAudit = !presetId || !String(presetId).trim();
 
   if (!apiKey || apiKey === 'MY_GEMINI_API_KEY') {
     const msg =
-      'No se puede ejecutar la auditoría en vivo porque GEMINI_API_KEY (o API_KEY) no está configurada en el servidor.';
-    console.error(`[StoreLevelUp Engine] ${msg}`);
+      'GEMINI_API_KEY no está configurada en el servidor.';
 
     if (isCustomUserAudit) {
       return res.status(400).json({
         error:
-          'GEMINI_API_KEY no está configurada en las variables de entorno del servidor (Vercel Settings → Environment Variables). Si recién la agregaste, haz clic en "Redeploy" en Vercel para activarla.',
+          'GEMINI_API_KEY no está configurada en las variables de entorno de Vercel (Project Settings → Environment Variables). Agrégala y haz un Redeploy.',
       });
     }
 
@@ -800,16 +732,7 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const ai = new GoogleGenAI({
-      apiKey,
-      httpOptions: {
-        headers: {
-          'User-Agent': 'aistudio-build',
-        },
-      },
-    });
-
-    const parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> = [];
+    const parts = [];
 
     if (effectiveBase64 && effectiveBase64.length > 50) {
       const cleanBase64 = effectiveBase64.replace(/^data:[^;]+;base64,/, '');
@@ -835,42 +758,71 @@ export default async function handler(req: any, res: any) {
 
     parts.push({ text: contextLines });
 
+    const restPayload = {
+      systemInstruction: {
+        parts: [{ text: SYSTEM_INSTRUCTION }],
+      },
+      contents: [
+        {
+          role: 'user',
+          parts,
+        },
+      ],
+      generationConfig: {
+        temperature: 0.3,
+        responseMimeType: 'application/json',
+        responseSchema: auditResponseSchema,
+      },
+    };
+
     const candidateModels = [
-      'gemini-3.5-flash-lite',
-      'gemini-3.1-flash-lite',
-      'gemini-3.8-flash',
       'gemini-2.5-flash',
+      'gemini-2.0-flash',
+      'gemini-3.5-flash-lite',
+      'gemini-1.5-flash',
     ];
-    let response = null;
+
     let usedModel = candidateModels[0];
-    let lastModelError: unknown = null;
+    let parsed = null;
+    let lastError = null;
 
     for (const modelName of candidateModels) {
       try {
         usedModel = modelName;
-        const supportsMinimalThinking =
-          modelName === 'gemini-3.5-flash-lite' || modelName === 'gemini-3.1-flash-lite';
-        response = await ai.models.generateContent({
-          model: modelName,
-          contents: { parts },
-          config: {
-            systemInstruction: SYSTEM_INSTRUCTION,
-            responseMimeType: 'application/json',
-            responseSchema: auditResponseSchema,
-            temperature: 0.3,
-            ...(supportsMinimalThinking
-              ? { thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL } }
-              : {}),
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
+        const geminiRes = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'aistudio-build',
           },
+          body: JSON.stringify(restPayload),
+          signal: AbortSignal.timeout(30000),
         });
+
+        if (!geminiRes.ok) {
+          const errText = await geminiRes.text();
+          lastError = new Error(`HTTP ${geminiRes.status} (${modelName}): ${errText.slice(0, 200)}`);
+          if (geminiRes.status === 404 || geminiRes.status === 503 || geminiRes.status === 429) {
+            continue;
+          }
+          throw lastError;
+        }
+
+        const data = await geminiRes.json();
+        const rawJsonText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!rawJsonText) {
+          throw new Error(`Respuesta vacía o sin candidates del modelo ${modelName}.`);
+        }
+
+        parsed = JSON.parse(rawJsonText);
         break;
-      } catch (modelErr) {
-        lastModelError = modelErr;
-        const errStr = String(modelErr);
+      } catch (err) {
+        lastError = err;
+        const errStr = String(err);
         if (
           errStr.includes('404') ||
           errStr.includes('NOT_FOUND') ||
-          errStr.includes('no longer available') ||
           errStr.includes('503') ||
           errStr.includes('UNAVAILABLE') ||
           errStr.includes('429') ||
@@ -880,24 +832,18 @@ export default async function handler(req: any, res: any) {
         ) {
           continue;
         }
-        throw modelErr;
+        throw err;
       }
     }
 
-    if (!response) {
-      throw lastModelError || new Error('No se pudo obtener respuesta de Gemini.');
+    if (!parsed) {
+      throw lastError || new Error('No se pudo obtener respuesta de ningún modelo de Gemini.');
     }
 
-    const rawText = response.text;
-    if (!rawText) {
-      throw new Error(`Respuesta vacía del modelo ${usedModel}.`);
-    }
-
-    const parsed = JSON.parse(rawText) as Partial<StoreAuditReport>;
     parsed.audit_source = 'live_gemini';
     parsed.engine_notes = scrapedMeta
-      ? `Análisis multimodal Gemini (${usedModel}) + Extracción HTML en vivo completado.`
-      : `Análisis multimodal Gemini (${usedModel}) en vivo completado.`;
+      ? `Análisis multimodal Gemini REST (${usedModel}) + Extracción HTML completado.`
+      : `Análisis multimodal Gemini REST (${usedModel}) en vivo completado.`;
 
     if (capturedImageUrl) {
       parsed.captured_image_url = capturedImageUrl;
@@ -919,13 +865,12 @@ export default async function handler(req: any, res: any) {
     const normalized = normalizeLiveOrFallbackReport(parsed);
     return res.status(200).json(normalized);
   } catch (error) {
-    const errorDetail =
-      error instanceof Error ? `${error.name}: ${error.message}` : String(error);
-    console.error('[StoreLevelUp Engine] Error en llamada a Gemini:', error);
+    const errorDetail = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+    console.error('[StoreLevelUp Engine] Error en llamada a Gemini REST API:', error);
 
     if (isCustomUserAudit) {
       return res.status(500).json({
-        error: `No se pudo completar el análisis en vivo con Gemini (${errorDetail}). Verifica la imagen o la configuración de GEMINI_API_KEY e intenta nuevamente.`,
+        error: `No se pudo completar el análisis en vivo con Gemini REST API (${errorDetail}). Verifica la imagen o la configuración de GEMINI_API_KEY e intenta nuevamente.`,
       });
     }
 
@@ -936,7 +881,7 @@ export default async function handler(req: any, res: any) {
       presetId,
       scrapedMeta,
       capturedImageUrl,
-      engineNotes: `Fallback activado tras error en Gemini API (${errorDetail})`,
+      engineNotes: `Fallback activado tras error en Gemini REST API (${errorDetail})`,
     });
     return res.status(200).json(fallbackReport);
   }

@@ -1,9 +1,4 @@
 {
-  "functions": {
-    "api/audit.ts": {
-      "maxDuration": 60
-    }
-  },
   "rewrites": [
     {
       "source": "/api/(.*)",
