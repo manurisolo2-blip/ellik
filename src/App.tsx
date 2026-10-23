@@ -360,11 +360,11 @@ const SubScoresRadarPentagon: React.FC<{
 export default function App() {
   const initialMode =
     typeof window !== 'undefined' &&
-    new URLSearchParams(window.location.search).get('mode') === 'scanner'
-      ? 'scanner'
-      : 'report';
+    new URLSearchParams(window.location.search).get('mode') === 'report'
+      ? 'report'
+      : 'scanner';
 
-  const [screenMode, setScreenMode] = useState<'scanner' | 'report'>(initialMode);
+  const [screenMode, setScreenMode] = useState<'scanner' | 'report'>('scanner');
   const [isCustomAudit, setIsCustomAudit] = useState<boolean>(false);
   const [activePlatform, setActivePlatform] = useState<EcommercePlatform>('Shopify');
   const [activeStoreUrl, setActiveStoreUrl] = useState<string>(
@@ -617,11 +617,11 @@ export default function App() {
       )}
 
       {screenMode === 'scanner' ? (
-        /* SCREEN 1: MODO ESCÁNER — Expansive full-width layout */
+        /* SCREEN 1: MODO ESCÁNER — Landing Page Principal */
         <main
           id="top"
           data-testid="scanner-screen"
-          className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8"
+          className="flex-1 w-full max-w-[1160px] mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8"
         >
           <div className="flex items-center justify-between gap-4">
             <div className="text-xs font-bold font-display text-[#FF5500] tracking-wider uppercase">
