@@ -85,12 +85,10 @@ const ConversionArcGauge: React.FC<{
         Score de Conversión
       </h2>
 
-      <div className="relative flex flex-col items-center justify-center">
+      <div className="relative flex flex-col items-center justify-center w-full">
         <svg
-          width="220"
-          height="176"
           viewBox="0 0 220 176"
-          className="overflow-visible"
+          className="w-full max-w-[280px] h-auto overflow-visible mx-auto"
           aria-label={`Score de Conversión ${clamped} sobre 100`}
         >
           {/* Outer crisp radial tick marks */}
@@ -191,10 +189,8 @@ const ConversionProjectionChart: React.FC<{
   return (
     <div className="pt-1 flex flex-col items-center w-full">
       <svg
-        width="100%"
-        height="114"
         viewBox="0 0 240 114"
-        className="max-w-[240px] overflow-visible"
+        className="w-full max-w-[320px] h-auto overflow-visible mx-auto"
         aria-label="Gráfico de Proyección de Conversión"
       >
         {/* 4 Subtle Horizontal Hairline Grid Lines */}
@@ -286,10 +282,8 @@ const SubScoresRadarPentagon: React.FC<{
   return (
     <div className="pt-1 flex flex-col items-center select-none w-full">
       <svg
-        width="240"
-        height="202"
         viewBox="0 0 240 202"
-        className="overflow-visible"
+        className="w-full max-w-[300px] h-auto overflow-visible mx-auto"
         aria-label="Radar de 5 ejes: Visual, CTA, Copy, Trust y Precio/UX"
       >
         {/* 4 Concentric Pentagon Rings */}
@@ -476,7 +470,7 @@ export default function App() {
 
       {/* TOP NAVIGATION BAR — Full screen width with "ellik." and Cog Wheel "Ajustes" */}
       <header className="sticky top-0 z-30 bg-[#0C0B0A]/95 backdrop-blur-md border-b border-[#1A1816] w-full">
-        <div className="w-full flex items-center justify-between gap-4 px-5 sm:px-8 xl:px-12 py-3.5">
+        <div className="w-full flex items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 py-3">
           <a
             href="#top"
             onClick={(e) => {
@@ -627,7 +621,7 @@ export default function App() {
         <main
           id="top"
           data-testid="scanner-screen"
-          className="flex-1 w-full max-w-7xl mx-auto px-5 sm:px-8 xl:px-12 py-10 sm:py-16 space-y-9"
+          className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8"
         >
           <div className="flex items-center justify-between gap-4">
             <div className="text-xs font-bold font-display text-[#FF5500] tracking-wider uppercase">
@@ -642,7 +636,7 @@ export default function App() {
             </button>
           </div>
 
-          <div id="escaner-principal" className="space-y-3 max-w-2xl">
+          <div id="escaner-principal" className="space-y-3 max-w-4xl">
             <h1 className="text-3xl sm:text-5xl font-bold text-[#F5F3EF] font-display tracking-tight leading-[1.08]">
               Detecta por qué tu tienda pierde ventas y corrígelo en 5 minutos.
             </h1>
@@ -680,7 +674,7 @@ export default function App() {
         <main
           id="top"
           data-testid="report-screen"
-          className="flex-1 w-full px-5 sm:px-8 xl:px-12 py-5 space-y-6"
+          className="flex-1 w-full px-3 sm:px-5 lg:px-6 py-4 space-y-4"
         >
           {/* SUB-HEADER BAR: "← Auditar otra tienda" Left | "Modo Reporte" Center | Quick Actions Right */}
           <div className="grid grid-cols-3 items-center gap-4 pb-1">
@@ -736,12 +730,12 @@ export default function App() {
           </div>
 
           {/* MAIN 3-COLUMN FULL-WIDTH COCKPIT GRID */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 xl:gap-8 items-start w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 xl:gap-6 items-start w-full">
             {/* LEFT COLUMN (3 cols): Telemetry Card with Score Arc Gauge + Line Chart + Radar Pentagon */}
             <section
               id="diagnostico-cro"
               aria-label="Telemetría y Score de Conversión"
-              className="lg:col-span-3 bg-[#121110] border border-[#1E1C19] rounded-2xl p-5 flex flex-col justify-between space-y-6 w-full"
+              className="lg:col-span-3 bg-[#121110] border border-[#1E1C19] rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-6 w-full"
             >
               <ConversionArcGauge
                 score={levelUp.projectedScore}
@@ -832,7 +826,7 @@ export default function App() {
       )}
 
       {/* Full-width Colophon Footer */}
-      <footer className="py-8 px-5 sm:px-8 xl:px-12 mt-12 border-t border-[#171513] w-full">
+      <footer className="py-6 px-4 sm:px-6 lg:px-8 mt-8 border-t border-[#171513] w-full">
         <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#78746D]">
           <div className="flex items-center gap-2">
             <span className="font-bold text-[#F5F3EF] font-display text-sm">

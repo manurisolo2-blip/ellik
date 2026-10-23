@@ -316,7 +316,7 @@ export const ProductScreenshotInspector: React.FC<ProductScreenshotInspectorProp
                     alt={`Captura de pantalla de ${realProductName}`}
                     referrerPolicy="no-referrer"
                     onError={() => setImageLoadFailed(true)}
-                    className="w-full h-auto max-h-[620px] 2xl:max-h-[720px] object-contain block mx-auto"
+                    className="w-full h-auto max-h-[820px] 2xl:max-h-[900px] object-contain block mx-auto"
                   />
 
                   {/* Teardrop Map Pins (#1, #2, #3...) matching the mockup */}

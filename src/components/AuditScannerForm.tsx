@@ -113,7 +113,7 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
   };
 
   return (
-    <div className="bg-[#161513] rounded-2xl p-6 sm:p-9 space-y-8">
+    <div className="bg-[#121110] border border-[#1E1C19] rounded-2xl p-6 sm:p-8 space-y-8 w-full">
       <form onSubmit={handleSubmit} className="space-y-8" noValidate>
         {/* Platform Selector */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
