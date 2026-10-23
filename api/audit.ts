@@ -1,11 +1,293 @@
 import { GoogleGenAI, Type } from '@google/genai';
-import {
-  normalizeAuditReport,
-  PRESET_STORE_CASES,
-  StoreAuditReport,
-  parseStoreHtmlMetadata,
-  ScrapedStoreMetadata,
-} from '../src/utils/auditEngine';
+
+export interface SubScores {
+  visual_clarity: number;
+  cta_power: number;
+  trust_and_security: number;
+  copywriting_persuasion: number;
+}
+
+export interface MissionItem {
+  id: number;
+  title: string;
+  visual_evidence_detected: string;
+  problem_detected: string;
+  sales_impact: string;
+  xp_reward: number;
+  quick_fix_5min: string;
+  x_percent: number;
+  y_percent: number;
+}
+
+export interface ProAiCopywritingPack {
+  optimized_product_title: string;
+  optimized_bullet_benefits: string[];
+  optimized_cta_button_text: string;
+  trust_guarantee_microcopy: string;
+}
+
+export type AuditSourceType = 'live_gemini' | 'heuristic_fallback';
+
+export interface StoreAuditReport {
+  overall_score: number;
+  rank_title: string;
+  estimated_lost_sales_percentage: string;
+  summary_verdict: string;
+  detected_product_name: string;
+  detected_product_price: string;
+  sub_scores: SubScores;
+  free_critical_missions: MissionItem[];
+  pro_locked_missions: MissionItem[];
+  pro_ai_copywriting_pack: ProAiCopywritingPack;
+  audit_source?: AuditSourceType;
+  engine_notes?: string;
+  captured_image_url?: string;
+}
+
+export interface ScrapedStoreMetadata {
+  contextText: string;
+  pageTitle: string;
+  detectedPrice: string;
+  ogImageUrl: string | null;
+}
+
+function getRankTitleForScore(score: number): string {
+  if (score >= 90) return 'Leyenda del Checkout';
+  if (score >= 80) return 'Maestro de Conversión';
+  if (score >= 70) return 'Mercader Audaz';
+  if (score >= 55) return 'Artesano en Ascenso';
+  return 'Mercader Aprendiz';
+}
+
+function stripHtmlTags(htmlFragment: string): string {
+  return htmlFragment
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export function parseStoreHtmlMetadata(html: string, baseUrl = ''): ScrapedStoreMetadata | null {
+  if (!html || typeof html !== 'string') return null;
+
+  const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+  const rawTitle = titleMatch ? stripHtmlTags(titleMatch[1]) : '';
+
+  const ogTitleMatch =
+    html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']*)["'][^>]*>/i) ||
+    html.match(/<meta[^>]+content=["']([^"']*)["'][^>]+property=["']og:title["'][^>]*>/i);
+  const ogTitle = ogTitleMatch ? stripHtmlTags(ogTitleMatch[1]) : '';
+
+  const metaDescMatch =
+    html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["'][^>]*>/i) ||
+    html.match(/<meta[^>]+content=["']([^"']*)["'][^>]+name=["']description["'][^>]*>/i);
+  const metaDescription = metaDescMatch ? stripHtmlTags(metaDescMatch[1]) : '';
+
+  const ogImageMatch =
+    html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']*)["'][^>]*>/i) ||
+    html.match(/<meta[^>]+content=["']([^"']*)["'][^>]+property=["']og:image["'][^>]*>/i);
+  let ogImageUrl = ogImageMatch ? ogImageMatch[1].trim() : null;
+  if (ogImageUrl && ogImageUrl.startsWith('//')) {
+    ogImageUrl = `https:${ogImageUrl}`;
+  } else if (ogImageUrl && ogImageUrl.startsWith('/') && baseUrl) {
+    try {
+      ogImageUrl = new URL(ogImageUrl, baseUrl).toString();
+    } catch {
+      // keep as is
+    }
+  }
+
+  const metaPriceMatch =
+    html.match(/<meta[^>]+property=["'](?:product|og):price:amount["'][^>]+content=["']([^"']*)["'][^>]*>/i) ||
+    html.match(/<meta[^>]+content=["']([^"']*)["'][^>]+property=["'](?:product|og):price:amount["'][^>]*>/i);
+  const metaCurrencyMatch =
+    html.match(/<meta[^>]+property=["'](?:product|og):price:currency["'][^>]+content=["']([^"']*)["'][^>]*>/i) ||
+    html.match(/<meta[^>]+content=["']([^"']*)["'][^>]+property=["'](?:product|og):price:currency["'][^>]*>/i);
+
+  const headings: string[] = [];
+  const headingRegex = /<h[12][^>]*>([\s\S]*?)<\/h[12]>/gi;
+  let match: RegExpExecArray | null;
+  while ((match = headingRegex.exec(html)) !== null && headings.length < 8) {
+    const cleanHeading = stripHtmlTags(match[1]);
+    if (cleanHeading) {
+      headings.push(cleanHeading);
+    }
+  }
+
+  const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  const rawBody = bodyMatch ? bodyMatch[1] : html;
+  const bodyWithoutScriptsAndStyles = rawBody
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, ' ')
+    .replace(/<svg[\s\S]*?<\/svg>/gi, ' ');
+
+  const bodyText = stripHtmlTags(bodyWithoutScriptsAndStyles).slice(0, 1500);
+
+  let detectedPrice = '';
+  if (metaPriceMatch && metaPriceMatch[1].trim()) {
+    const currency = metaCurrencyMatch?.[1]?.trim() || '';
+    detectedPrice = `$${metaPriceMatch[1].trim()}${currency ? ` ${currency}` : ''}`;
+  } else {
+    const priceRegex = /(?:US\$|\$|€|ARS|USD|MXN|CLP|COP)\s?\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?/i;
+    const bodyPriceMatch = bodyText.match(priceRegex);
+    if (bodyPriceMatch) {
+      detectedPrice = bodyPriceMatch[0].trim();
+    }
+  }
+
+  const bestTitle = ogTitle || headings[0] || rawTitle;
+
+  const extractedSections = [
+    bestTitle ? `- Título del Producto Detectado: ${bestTitle}` : '',
+    detectedPrice ? `- Precio Detectado en HTML: ${detectedPrice}` : '',
+    metaDescription ? `- Meta Description: ${metaDescription}` : '',
+    headings.length > 0 ? `- Encabezados H1/H2: ${headings.join(' | ')}` : '',
+    bodyText ? `- Extracto del Body (1500 chars): ${bodyText}` : '',
+  ].filter(Boolean);
+
+  if (extractedSections.length === 0) return null;
+
+  return {
+    contextText: extractedSections.join('\n'),
+    pageTitle: bestTitle,
+    detectedPrice: detectedPrice || 'No visible',
+    ogImageUrl,
+  };
+}
+
+function normalizeLiveOrFallbackReport(raw: Partial<StoreAuditReport>): StoreAuditReport {
+  const clampScore = (val: unknown, def: number) => {
+    if (typeof val !== 'number' || Number.isNaN(val)) return def;
+    return Math.max(0, Math.min(100, Math.round(val)));
+  };
+
+  const clampCoord = (val: unknown, def: number) => {
+    if (typeof val !== 'number' || Number.isNaN(val)) return def;
+    return Math.max(8, Math.min(92, Math.round(val)));
+  };
+
+  const overall_score = clampScore(raw.overall_score, 0);
+  const rank_title =
+    typeof raw.rank_title === 'string' && raw.rank_title.trim()
+      ? raw.rank_title.trim()
+      : overall_score === 0
+      ? 'Imagen No Comercial'
+      : getRankTitleForScore(overall_score);
+
+  let estimated_lost_sales_percentage = '0%';
+  if (
+    typeof raw.estimated_lost_sales_percentage === 'string' &&
+    raw.estimated_lost_sales_percentage.trim()
+  ) {
+    const clean = raw.estimated_lost_sales_percentage.trim();
+    estimated_lost_sales_percentage = clean.endsWith('%') ? clean : `${clean}%`;
+  }
+
+  const summary_verdict =
+    typeof raw.summary_verdict === 'string' ? raw.summary_verdict.trim() : '';
+
+  const detected_product_name =
+    typeof raw.detected_product_name === 'string' && raw.detected_product_name.trim()
+      ? raw.detected_product_name.trim()
+      : 'No detectado en la captura';
+
+  const detected_product_price =
+    typeof raw.detected_product_price === 'string' && raw.detected_product_price.trim()
+      ? raw.detected_product_price.trim()
+      : 'No visible';
+
+  const sub_scores: SubScores = {
+    visual_clarity: clampScore(raw.sub_scores?.visual_clarity, 0),
+    cta_power: clampScore(raw.sub_scores?.cta_power, 0),
+    trust_and_security: clampScore(raw.sub_scores?.trust_and_security, 0),
+    copywriting_persuasion: clampScore(raw.sub_scores?.copywriting_persuasion, 0),
+  };
+
+  const sanitizeLiveMission = (
+    item: Partial<MissionItem> | undefined,
+    forcedId: number
+  ): MissionItem => ({
+    id: forcedId,
+    title: typeof item?.title === 'string' ? item.title.trim() : '',
+    visual_evidence_detected:
+      typeof item?.visual_evidence_detected === 'string'
+        ? item.visual_evidence_detected.trim()
+        : '',
+    problem_detected:
+      typeof item?.problem_detected === 'string' ? item.problem_detected.trim() : '',
+    sales_impact:
+      typeof item?.sales_impact === 'string' && item.sales_impact.trim()
+        ? item.sales_impact.trim()
+        : 'Alto',
+    xp_reward:
+      typeof item?.xp_reward === 'number' && item.xp_reward > 0
+        ? Math.round(item.xp_reward)
+        : 150,
+    quick_fix_5min:
+      typeof item?.quick_fix_5min === 'string' ? item.quick_fix_5min.trim() : '',
+    x_percent: clampCoord(item?.x_percent, 50),
+    y_percent: clampCoord(item?.y_percent, 50),
+  });
+
+  const rawFree = Array.isArray(raw.free_critical_missions) ? raw.free_critical_missions : [];
+  const free_critical_missions: MissionItem[] = rawFree.map((m, idx) =>
+    sanitizeLiveMission(m, idx + 1)
+  );
+
+  const rawPro = Array.isArray(raw.pro_locked_missions) ? raw.pro_locked_missions : [];
+  const pro_locked_missions: MissionItem[] = rawPro.map((m, idx) =>
+    sanitizeLiveMission(m, idx + 1 + free_critical_missions.length)
+  );
+
+  const rawBullets = Array.isArray(raw.pro_ai_copywriting_pack?.optimized_bullet_benefits)
+    ? raw.pro_ai_copywriting_pack!.optimized_bullet_benefits
+        .filter((b): b is string => typeof b === 'string' && b.trim().length > 0)
+        .map((b) => b.trim())
+    : [];
+
+  const pro_ai_copywriting_pack: ProAiCopywritingPack = {
+    optimized_product_title:
+      typeof raw.pro_ai_copywriting_pack?.optimized_product_title === 'string'
+        ? raw.pro_ai_copywriting_pack.optimized_product_title.trim()
+        : '',
+    optimized_bullet_benefits: rawBullets,
+    optimized_cta_button_text:
+      typeof raw.pro_ai_copywriting_pack?.optimized_cta_button_text === 'string'
+        ? raw.pro_ai_copywriting_pack.optimized_cta_button_text.trim()
+        : '',
+    trust_guarantee_microcopy:
+      typeof raw.pro_ai_copywriting_pack?.trust_guarantee_microcopy === 'string'
+        ? raw.pro_ai_copywriting_pack.trust_guarantee_microcopy.trim()
+        : '',
+  };
+
+  const liveResult: StoreAuditReport = {
+    overall_score,
+    rank_title,
+    estimated_lost_sales_percentage,
+    summary_verdict,
+    detected_product_name,
+    detected_product_price,
+    sub_scores,
+    free_critical_missions,
+    pro_locked_missions,
+    pro_ai_copywriting_pack,
+    audit_source: raw.audit_source || 'live_gemini',
+  };
+
+  if (typeof raw.engine_notes === 'string' && raw.engine_notes.trim()) {
+    liveResult.engine_notes = raw.engine_notes.trim();
+  }
+  if (typeof raw.captured_image_url === 'string' && raw.captured_image_url.trim()) {
+    liveResult.captured_image_url = raw.captured_image_url.trim();
+  }
+
+  return liveResult;
+}
 
 export const SYSTEM_INSTRUCTION = `Actúa como el motor de inteligencia artificial visual de "StoreLevelUp", un auditor experto en Optimización de Tasa de Conversión (CRO), diseño UI/UX para e-commerce (Shopify, Tiendanube, WooCommerce, MercadoLibre) y psicología de ventas con enfoque gamificado.
 
@@ -257,30 +539,10 @@ export function buildHeuristicCustomAudit(params: {
     platform = 'Shopify',
     storeUrl = '',
     productCopy = '',
-    presetId,
     scrapedMeta,
     capturedImageUrl,
     engineNotes,
   } = params;
-
-  const isPresetDemo = Boolean(presetId && PRESET_STORE_CASES.some((p) => p.id === presetId));
-  const matchingPreset =
-    PRESET_STORE_CASES.find((p) => p.id === presetId) ??
-    PRESET_STORE_CASES.find((p) => p.platform.toLowerCase() === platform.toLowerCase()) ??
-    PRESET_STORE_CASES[0];
-
-  const base = structuredClone(matchingPreset.report);
-  base.audit_source = 'heuristic_fallback';
-  base.engine_notes =
-    engineNotes || 'Diagnóstico generado con motor heurístico local (fallback).';
-
-  if (capturedImageUrl) {
-    base.captured_image_url = capturedImageUrl;
-  }
-
-  if (isPresetDemo && !storeUrl.trim() && !productCopy.trim()) {
-    return normalizeAuditReport(base, matchingPreset.id);
-  }
 
   const cleanCopy = productCopy.trim();
   const priceRegex = /(?:US\$|\$|€|ARS|USD|MXN|CLP|COP)\s?\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?/i;
@@ -311,23 +573,132 @@ export function buildHeuristicCustomAudit(params: {
       : '') ||
     (copyPriceMatch ? copyPriceMatch[0].trim() : 'No visible');
 
-  base.detected_product_name = realTitle;
-  base.detected_product_price = realPrice;
-  base.summary_verdict = `Auditoría CRO en ${platform} para "${realTitle}": detectamos fugas de conversión en la jerarquía visual del botón de compra, falta de micro-garantías junto al precio (${realPrice}) y copy que no resuelve objeciones inmediatas.`;
-
-  base.pro_ai_copywriting_pack = {
-    optimized_product_title: `${realTitle} — Edición Destacada con Garantía de Satisfacción y Envío Rápido`,
-    optimized_bullet_benefits: [
-      `Resultados reales desde el primer uso con ${realTitle}, diseñado para máxima durabilidad y confort diario.`,
-      'Compra 100% libre de riesgo: cambios y devoluciones sin costo durante los primeros 30 días.',
-      'Despacho prioritario con seguimiento en tiempo real y embalaje protegido hasta tu puerta.',
+  return normalizeLiveOrFallbackReport({
+    overall_score: 64,
+    rank_title: 'Artesano en Ascenso',
+    estimated_lost_sales_percentage: '28%',
+    summary_verdict: `Auditoría CRO en ${platform} para "${realTitle}": detectamos fugas de conversión en la jerarquía visual del botón de compra, falta de micro-garantías junto al precio (${realPrice}) y copy que no resuelve objeciones inmediatas.`,
+    detected_product_name: realTitle,
+    detected_product_price: realPrice,
+    sub_scores: {
+      visual_clarity: 72,
+      cta_power: 54,
+      trust_and_security: 48,
+      copywriting_persuasion: 62,
+    },
+    free_critical_missions: [
+      {
+        id: 1,
+        title: 'Contraste y Jerarquía del CTA Principal',
+        visual_evidence_detected: `Botón de acción principal junto a "${realTitle}"`,
+        problem_detected:
+          'El botón principal no domina visualmente el primer pantallazo frente a elementos secundarios.',
+        sales_impact: 'Alto',
+        xp_reward: 150,
+        quick_fix_5min:
+          'Aumenta el alto del botón a 54px, usa color de alto contraste y agrega verbo de acción directa.',
+        x_percent: 72,
+        y_percent: 62,
+      },
+      {
+        id: 2,
+        title: 'Anclaje de Valor Junto al Precio',
+        visual_evidence_detected: `Bloque de precio (${realPrice}) sin desglose de cuotas ni envío`,
+        problem_detected:
+          'El precio aparece aislado sin contexto de cuotas sin interés ni costo de envío inmediato.',
+        sales_impact: 'Alto',
+        xp_reward: 150,
+        quick_fix_5min:
+          'Coloca debajo del precio el desglose en cuotas y una insignia de envío rápido.',
+        x_percent: 66,
+        y_percent: 34,
+      },
+      {
+        id: 3,
+        title: 'Micro-Garantías Bajo el Botón de Compra',
+        visual_evidence_detected: 'Zona inferior del botón de compra sin sellos de garantía',
+        problem_detected:
+          'Ausencia de garantías de cambio/devolución y pago protegido en el momento de decisión.',
+        sales_impact: 'Medio/Alto',
+        xp_reward: 140,
+        quick_fix_5min:
+          'Agrega una línea de microcopy con íconos de Pago Protegido y Cambios Gratis por 30 días.',
+        x_percent: 72,
+        y_percent: 74,
+      },
     ],
-    optimized_cta_button_text: `Comprar ${realTitle.slice(0, 28)} con Envío Seguro →`,
-    trust_guarantee_microcopy:
-      'Pago 100% protegido · Garantía de satisfacción de 30 días · Despacho rápido verificado',
-  };
-
-  return normalizeAuditReport(base, matchingPreset.id);
+    pro_locked_missions: [
+      {
+        id: 4,
+        title: 'Prueba Social Cercana al Título',
+        visual_evidence_detected: `Encabezado "${realTitle}" sin calificación visible`,
+        problem_detected: 'No se visualizan estrellas ni conteo de reseñas verificadas sobre el pliegue.',
+        sales_impact: 'Alto',
+        xp_reward: 180,
+        quick_fix_5min: 'Inserta estrellas y enlace a reseñas reales justo debajo del H1.',
+        x_percent: 64,
+        y_percent: 21,
+      },
+      {
+        id: 5,
+        title: 'Optimización de Miniaturas en Galería',
+        visual_evidence_detected: 'Galería principal de producto a la izquierda',
+        problem_detected: 'Faltan ángulos de detalle y foto en contexto de uso real.',
+        sales_impact: 'Medio/Alto',
+        xp_reward: 160,
+        quick_fix_5min: 'Ordena la galería: 1) Producto, 2) En uso, 3) Detalle/Tabla de medidas.',
+        x_percent: 28,
+        y_percent: 48,
+      },
+      {
+        id: 6,
+        title: 'Bullets Orientados a Beneficios',
+        visual_evidence_detected: 'Bloque de descripción textual del producto',
+        problem_detected: 'El texto describe características técnicas sin traducirlas en beneficios.',
+        sales_impact: 'Medio/Alto',
+        xp_reward: 170,
+        quick_fix_5min: 'Reemplaza el párrafo denso por 3 bullets escaneables con íconos.',
+        x_percent: 68,
+        y_percent: 46,
+      },
+      {
+        id: 7,
+        title: 'Estimador de Entrega por Ubicación',
+        visual_evidence_detected: 'Área inferior del formulario de compra',
+        problem_detected: 'El comprador debe avanzar al checkout para saber cuándo recibe su pedido.',
+        sales_impact: 'Alto',
+        xp_reward: 200,
+        quick_fix_5min: 'Muestra fecha estimada ("Recíbelo entre martes y jueves") sobre el CTA.',
+        x_percent: 70,
+        y_percent: 82,
+      },
+      {
+        id: 8,
+        title: 'Sticky Bar de Compra en Mobile',
+        visual_evidence_detected: 'Cierre de primer viewport',
+        problem_detected: 'Al hacer scroll para leer detalles se pierde de vista el botón de compra.',
+        sales_impact: 'Medio',
+        xp_reward: 140,
+        quick_fix_5min: 'Activa una barra fija inferior en mobile con precio y botón Comprar.',
+        x_percent: 50,
+        y_percent: 89,
+      },
+    ],
+    pro_ai_copywriting_pack: {
+      optimized_product_title: `${realTitle} — Edición Destacada con Garantía de Satisfacción y Envío Rápido`,
+      optimized_bullet_benefits: [
+        `Resultados reales desde el primer uso con ${realTitle}, diseñado para máxima durabilidad y confort diario.`,
+        'Compra 100% libre de riesgo: cambios y devoluciones sin costo durante los primeros 30 días.',
+        'Despacho prioritario con seguimiento en tiempo real y embalaje protegido hasta tu puerta.',
+      ],
+      optimized_cta_button_text: `Comprar ${realTitle.slice(0, 28)} con Envío Seguro →`,
+      trust_guarantee_microcopy:
+        'Pago 100% protegido · Garantía de satisfacción de 30 días · Despacho rápido verificado',
+    },
+    audit_source: 'heuristic_fallback',
+    engine_notes: engineNotes || 'Diagnóstico generado con motor heurístico local (fallback).',
+    captured_image_url: capturedImageUrl,
+  });
 }
 
 export default async function handler(req: any, res: any) {
@@ -407,7 +778,7 @@ export default async function handler(req: any, res: any) {
     if (isCustomUserAudit) {
       return res.status(400).json({
         error:
-          'GEMINI_API_KEY no está configurada en las variables de entorno del servidor (Vercel Settings → Environment Variables). Agrégala para auditar capturas y tiendas en vivo.',
+          'GEMINI_API_KEY no está configurada en las variables de entorno del servidor (Vercel Settings → Environment Variables). Si recién la agregaste, haz clic en "Redeploy" en Vercel para activarla.',
       });
     }
 
@@ -530,7 +901,7 @@ export default async function handler(req: any, res: any) {
       parsed.detected_product_price = scrapedMeta.detectedPrice;
     }
 
-    const normalized = normalizeAuditReport(parsed, presetId || 'shopify-sneaker');
+    const normalized = normalizeLiveOrFallbackReport(parsed);
     return res.status(200).json(normalized);
   } catch (error) {
     const errorDetail =
