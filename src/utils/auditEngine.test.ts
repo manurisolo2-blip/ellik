@@ -145,3 +145,69 @@ test('parseStoreHtmlMetadata and extractStoreHtmlContext extract title, price, o
   assert.ok(extracted.includes('$189.900'));
   assert.ok(!extracted.includes('secret tracker'));
 });
+
+test('api/audit Vercel serverless handler responds to OPTIONS, rejects GET with 405, and processes POST requests', async () => {
+  const { default: auditHandler } = await import('../../api/audit');
+
+  const createMockRes = () => {
+    const res: any = {
+      statusCode: 200,
+      headers: {} as Record<string, string>,
+      body: null as any,
+      ended: false,
+      setHeader(k: string, v: string) {
+        this.headers[k] = v;
+        return this;
+      },
+      status(code: number) {
+        this.statusCode = code;
+        return this;
+      },
+      json(payload: any) {
+        this.body = payload;
+        this.ended = true;
+        return this;
+      },
+      end() {
+        this.ended = true;
+        return this;
+      },
+    };
+    return res;
+  };
+
+  // 1. OPTIONS request
+  const optRes = createMockRes();
+  await auditHandler({ method: 'OPTIONS' }, optRes);
+  assert.equal(optRes.statusCode, 200);
+  assert.equal(optRes.ended, true);
+
+  // 2. GET request -> 405
+  const getRes = createMockRes();
+  await auditHandler({ method: 'GET' }, getRes);
+  assert.equal(getRes.statusCode, 405);
+  assert.ok(getRes.body?.error);
+
+  // 3. POST request with presetId when GEMINI_API_KEY is unset -> returns valid StoreAuditReport
+  const prevKey = process.env.GEMINI_API_KEY;
+  delete process.env.GEMINI_API_KEY;
+  try {
+    const postRes = createMockRes();
+    await auditHandler(
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          platform: 'Shopify',
+          presetId: 'shopify-sneaker',
+        }),
+      },
+      postRes
+    );
+    assert.equal(postRes.statusCode, 200);
+    assert.equal(typeof postRes.body?.overall_score, 'number');
+  } finally {
+    if (prevKey !== undefined) {
+      process.env.GEMINI_API_KEY = prevKey;
+    }
+  }
+});

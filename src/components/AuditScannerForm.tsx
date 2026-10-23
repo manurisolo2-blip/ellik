@@ -33,6 +33,74 @@ const PLATFORMS: EcommercePlatform[] = [
   'MercadoLibre',
 ];
 
+function compressImageFileToJpegDataUrl(
+  file: File,
+  maxDimension = 1280,
+  quality = 0.82
+): Promise<{ dataUrl: string; mimeType: string }> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('No se pudo leer el archivo de imagen seleccionado.'));
+    reader.onload = () => {
+      const rawDataUrl = typeof reader.result === 'string' ? reader.result : '';
+      if (!rawDataUrl) {
+        reject(new Error('El archivo de imagen está vacío.'));
+        return;
+      }
+
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const origWidth = img.naturalWidth || img.width || 1280;
+          const origHeight = img.naturalHeight || img.height || 800;
+
+          let targetWidth = origWidth;
+          let targetHeight = origHeight;
+
+          if (origWidth > maxDimension || origHeight > maxDimension) {
+            if (origWidth >= origHeight) {
+              targetWidth = maxDimension;
+              targetHeight = Math.max(1, Math.round((origHeight * maxDimension) / origWidth));
+            } else {
+              targetHeight = maxDimension;
+              targetWidth = Math.max(1, Math.round((origWidth * maxDimension) / origHeight));
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve({ dataUrl: rawDataUrl, mimeType: file.type || 'image/jpeg' });
+            return;
+          }
+
+          // Fill solid dark background in case source PNG has transparency before JPEG export
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, targetWidth, targetHeight);
+          ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+          if (compressedDataUrl && compressedDataUrl.startsWith('data:image/jpeg')) {
+            resolve({ dataUrl: compressedDataUrl, mimeType: 'image/jpeg' });
+          } else {
+            resolve({ dataUrl: rawDataUrl, mimeType: file.type || 'image/jpeg' });
+          }
+        } catch {
+          resolve({ dataUrl: rawDataUrl, mimeType: file.type || 'image/jpeg' });
+        }
+      };
+      img.onerror = () => {
+        resolve({ dataUrl: rawDataUrl, mimeType: file.type || 'image/jpeg' });
+      };
+      img.src = rawDataUrl;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
   defaultPlatform,
   onAuditCompleted,
@@ -41,25 +109,26 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
   const [storeUrl, setStoreUrl] = useState('');
   const [productCopy, setProductCopy] = useState('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageMimeType, setImageMimeType] = useState<string>('image/png');
+  const [imageMimeType, setImageMimeType] = useState<string>('image/jpeg');
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setValidationError(null);
-    setImageMimeType(file.type || 'image/png');
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setImagePreview(reader.result);
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      const { dataUrl, mimeType } = await compressImageFileToJpegDataUrl(file, 1280, 0.82);
+      setImageMimeType(mimeType);
+      setImagePreview(dataUrl);
+    } catch (err) {
+      setValidationError(
+        err instanceof Error ? err.message : 'No se pudo procesar la imagen seleccionada.'
+      );
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,19 +152,21 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
           ? 'http://localhost:3000/api/audit'
           : '/api/audit';
 
+      const requestPayload = JSON.stringify({
+        platform,
+        storeUrl: storeUrl.trim(),
+        productCopy: productCopy.trim(),
+        imageBase64: imagePreview,
+        mimeType: imageMimeType,
+      });
+
       let response = await fetch(primaryEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          platform,
-          storeUrl: storeUrl.trim(),
-          productCopy: productCopy.trim(),
-          imageBase64: imagePreview,
-          mimeType: imageMimeType,
-        }),
+        body: requestPayload,
       });
 
-      // Fallback if relative /api/audit returned 404 in dev
+      // Fallback if relative /api/audit returned 404 in local Vite dev
       if (
         !response.ok &&
         response.status === 404 &&
@@ -106,24 +177,66 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
         response = await fetch('http://localhost:3000/api/audit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            platform,
-            storeUrl: storeUrl.trim(),
-            productCopy: productCopy.trim(),
-            imageBase64: imagePreview,
-            mimeType: imageMimeType,
-          }),
+          body: requestPayload,
         });
       }
 
+      const rawText = await response.text();
+      let parsedJson: Record<string, any> | null = null;
+      try {
+        parsedJson = rawText ? JSON.parse(rawText) : null;
+      } catch {
+        parsedJson = null;
+      }
+
       if (!response.ok) {
-        const errPayload = (await response.json().catch(() => null)) as { error?: string } | null;
+        if (parsedJson && typeof parsedJson.error === 'string') {
+          throw new Error(parsedJson.error);
+        }
+
+        const cleanSnippet = rawText
+          .replace(/<[^>]*>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .slice(0, 180);
+
+        if (response.status === 413) {
+          throw new Error(
+            `Error 413 (Payload Too Large): La imagen supera el límite permitido por el servidor (${cleanSnippet || 'FUNCTION_PAYLOAD_TOO_LARGE'}).`
+          );
+        }
+        if (response.status === 404) {
+          throw new Error(
+            `Error 404: El endpoint /api/audit no fue encontrado en el servidor (${cleanSnippet || 'NOT_FOUND'}).`
+          );
+        }
+        if (response.status === 504) {
+          throw new Error(
+            `Error 504 (Timeout): El análisis de IA superó el tiempo límite de espera en el servidor (${cleanSnippet || 'GATEWAY_TIMEOUT'}). Intenta nuevamente.`
+          );
+        }
+
         throw new Error(
-          errPayload?.error || `Error del servidor al procesar la auditoría (${response.status})`
+          `Error del servidor (${response.status} ${response.statusText || ''}): ${
+            cleanSnippet || 'Respuesta no válida desde /api/audit.'
+          }`.trim()
         );
       }
 
-      const report = (await response.json()) as StoreAuditReport;
+      if (!parsedJson || typeof parsedJson.overall_score !== 'number') {
+        const cleanSnippet = rawText
+          .replace(/<[^>]*>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .slice(0, 180);
+        throw new Error(
+          `La ruta /api/audit devolvió una respuesta que no es JSON válido (status ${response.status}): ${
+            cleanSnippet || 'Respuesta vacía o HTML inesperado.'
+          }`
+        );
+      }
+
+      const report = parsedJson as StoreAuditReport;
       onAuditCompleted(report, {
         platform,
         storeUrl: storeUrl.trim(),
@@ -206,7 +319,7 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
                 <div className="flex items-center gap-4 text-xs">
                   <span className="text-[#CCFF00] font-semibold inline-flex items-center gap-1.5">
                     <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-                    <span>Captura lista para inspección de píxeles</span>
+                    <span>Captura comprimida (JPEG ≤1280px) lista para inspección</span>
                   </span>
                   <button
                     type="button"
