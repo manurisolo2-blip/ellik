@@ -13,152 +13,72 @@ REGLAS OBLIGATORIAS DE ANÁLISIS VISUAL ESTRICTO:
 6. CANTIDAD EXACTA DE ELEMENTOS EN EL JSON:
    - "free_critical_missions" debe contener exactamente 3 elementos (IDs 1, 2 y 3).
    - "pro_locked_missions" debe contener exactamente 5 elementos (IDs 4, 5, 6, 7 y 8).
-   - "pro_ai_copywriting_pack.optimized_bullet_benefits" debe contener exactamente 3 beneficios persuasivos basados en el producto real detectado.`;
+   - "pro_ai_copywriting_pack.optimized_bullet_benefits" debe contener exactamente 3 beneficios persuasivos basados en el producto real detectado.
 
-export const missionSchema = {
-  type: 'OBJECT',
-  properties: {
-    id: { type: 'INTEGER', description: 'ID numérico secuencial de la misión' },
-    title: {
-      type: 'STRING',
-      description: 'Nombre corto y atractivo de la misión basado en el elemento real visto',
-    },
-    visual_evidence_detected: {
-      type: 'STRING',
-      description:
-        "Descripción en 1 línea de qué elemento visual exacto estás mirando en esas coordenadas de la captura (ej: \"Botón azul con texto 'Comprar ahora' debajo del precio $25.000\").",
-    },
-    problem_detected: {
-      type: 'STRING',
-      description:
-        'Explicación exacta de qué está mal citando entre comillas los textos, colores y ubicaciones reales leídos en la captura.',
-    },
-    sales_impact: {
-      type: 'STRING',
-      description: 'Impacto en ventas: Alto, Medio/Alto o Medio',
-    },
-    xp_reward: {
-      type: 'INTEGER',
-      description: 'Puntos de experiencia otorgados al completar la misión (ej. 150, 200)',
-    },
-    quick_fix_5min: {
-      type: 'STRING',
-      description:
-        'Instrucción paso a paso para arreglarlo en 5 minutos haciendo referencia a los textos y colores reales de la captura.',
-    },
-    x_percent: {
-      type: 'INTEGER',
-      description:
-        'Coordenada horizontal real (entero entre 8 y 92, en porcentaje del ancho de la imagen) donde se ubica ese elemento específico en la captura.',
-    },
-    y_percent: {
-      type: 'INTEGER',
-      description:
-        'Coordenada vertical real (entero entre 8 y 92, en porcentaje del alto de la imagen) donde se ubica ese elemento específico en la captura.',
-    },
+FORMATO OBLIGATORIO DE RESPUESTA:
+Debes responder EXCLUSIVAMENTE con un único objeto JSON válido sin texto previo ni posterior, siguiendo exactamente esta estructura de campos:
+{
+  "overall_score": 64,
+  "rank_title": "Artesano en Ascenso",
+  "estimated_lost_sales_percentage": "28%",
+  "summary_verdict": "Resumen conciso del estado CRO de la página.",
+  "detected_product_name": "Nombre real del producto detectado",
+  "detected_product_price": "$89.900",
+  "sub_scores": {
+    "visual_clarity": 72,
+    "cta_power": 54,
+    "trust_and_security": 48,
+    "copywriting_persuasion": 62
   },
-  required: [
-    'id',
-    'title',
-    'visual_evidence_detected',
-    'problem_detected',
-    'sales_impact',
-    'xp_reward',
-    'quick_fix_5min',
-    'x_percent',
-    'y_percent',
+  "free_critical_missions": [
+    {
+      "id": 1,
+      "title": "Nombre corto de la misión 1",
+      "visual_evidence_detected": "Elemento visual exacto visto en la coordenada",
+      "problem_detected": "Explicación del problema citando textos exactos entre comillas",
+      "sales_impact": "Alto",
+      "xp_reward": 150,
+      "quick_fix_5min": "Solución en 5 minutos",
+      "x_percent": 72,
+      "y_percent": 62
+    },
+    {
+      "id": 2,
+      "title": "Nombre corto de la misión 2",
+      "visual_evidence_detected": "Elemento visual exacto visto",
+      "problem_detected": "Explicación del problema",
+      "sales_impact": "Alto",
+      "xp_reward": 150,
+      "quick_fix_5min": "Solución en 5 minutos",
+      "x_percent": 66,
+      "y_percent": 34
+    },
+    {
+      "id": 3,
+      "title": "Nombre corto de la misión 3",
+      "visual_evidence_detected": "Elemento visual exacto visto",
+      "problem_detected": "Explicación del problema",
+      "sales_impact": "Medio/Alto",
+      "xp_reward": 140,
+      "quick_fix_5min": "Solución en 5 minutos",
+      "x_percent": 72,
+      "y_percent": 74
+    }
   ],
-};
-
-export const auditResponseSchema = {
-  type: 'OBJECT',
-  properties: {
-    overall_score: {
-      type: 'INTEGER',
-      description: 'Puntaje global de 0 a 100',
-    },
-    rank_title: {
-      type: 'STRING',
-      description: 'Rango gamificado actual (ej. Mercader Aprendiz, Artesano de Conversión)',
-    },
-    estimated_lost_sales_percentage: {
-      type: 'STRING',
-      description: 'Porcentaje estimado de ventas perdidas con símbolo %, ej. "28%"',
-    },
-    summary_verdict: {
-      type: 'STRING',
-      description: 'Resumen directo de 2 líneas sobre el estado actual de la página.',
-    },
-    detected_product_name: {
-      type: 'STRING',
-      description: 'El nombre real del producto que se ve en la captura o URL.',
-    },
-    detected_product_price: {
-      type: 'STRING',
-      description: 'El precio real que se ve en la captura o URL (ej. "$45.000" o "No visible").',
-    },
-    sub_scores: {
-      type: 'OBJECT',
-      properties: {
-        visual_clarity: { type: 'INTEGER' },
-        cta_power: { type: 'INTEGER' },
-        trust_and_security: { type: 'INTEGER' },
-        copywriting_persuasion: { type: 'INTEGER' },
-      },
-      required: ['visual_clarity', 'cta_power', 'trust_and_security', 'copywriting_persuasion'],
-    },
-    free_critical_missions: {
-      type: 'ARRAY',
-      items: missionSchema,
-      description: 'Exactamente 3 misiones críticas gratuitas (IDs 1, 2, 3)',
-    },
-    pro_locked_missions: {
-      type: 'ARRAY',
-      items: missionSchema,
-      description: 'Exactamente 5 misiones avanzadas bloqueadas Pro (IDs 4, 5, 6, 7, 8)',
-    },
-    pro_ai_copywriting_pack: {
-      type: 'OBJECT',
-      properties: {
-        optimized_product_title: {
-          type: 'STRING',
-          description: 'Título de producto reescrito y altamente persuasivo listo para copiar y pegar',
-        },
-        optimized_bullet_benefits: {
-          type: 'ARRAY',
-          items: { type: 'STRING' },
-          description: 'Exactamente 3 beneficios enfocados en transformación, objeción y calidad/rapidez',
-        },
-        optimized_cta_button_text: {
-          type: 'STRING',
-          description: 'Texto ideal para el botón de compra',
-        },
-        trust_guarantee_microcopy: {
-          type: 'STRING',
-          description: 'Texto corto de garantía/envío seguro para poner debajo del botón de compra',
-        },
-      },
-      required: [
-        'optimized_product_title',
-        'optimized_bullet_benefits',
-        'optimized_cta_button_text',
-        'trust_guarantee_microcopy',
-      ],
-    },
-  },
-  required: [
-    'overall_score',
-    'rank_title',
-    'estimated_lost_sales_percentage',
-    'summary_verdict',
-    'detected_product_name',
-    'detected_product_price',
-    'sub_scores',
-    'free_critical_missions',
-    'pro_locked_missions',
-    'pro_ai_copywriting_pack',
+  "pro_locked_missions": [
+    { "id": 4, "title": "Misión 4", "visual_evidence_detected": "Elemento", "problem_detected": "Problema", "sales_impact": "Alto", "xp_reward": 180, "quick_fix_5min": "Fix", "x_percent": 64, "y_percent": 21 },
+    { "id": 5, "title": "Misión 5", "visual_evidence_detected": "Elemento", "problem_detected": "Problema", "sales_impact": "Medio/Alto", "xp_reward": 160, "quick_fix_5min": "Fix", "x_percent": 28, "y_percent": 48 },
+    { "id": 6, "title": "Misión 6", "visual_evidence_detected": "Elemento", "problem_detected": "Problema", "sales_impact": "Medio/Alto", "xp_reward": 170, "quick_fix_5min": "Fix", "x_percent": 68, "y_percent": 46 },
+    { "id": 7, "title": "Misión 7", "visual_evidence_detected": "Elemento", "problem_detected": "Problema", "sales_impact": "Alto", "xp_reward": 200, "quick_fix_5min": "Fix", "x_percent": 70, "y_percent": 82 },
+    { "id": 8, "title": "Misión 8", "visual_evidence_detected": "Elemento", "problem_detected": "Problema", "sales_impact": "Medio", "xp_reward": 140, "quick_fix_5min": "Fix", "x_percent": 50, "y_percent": 89 }
   ],
-};
+  "pro_ai_copywriting_pack": {
+    "optimized_product_title": "Título persuasivo reescrito",
+    "optimized_bullet_benefits": ["Beneficio 1", "Beneficio 2", "Beneficio 3"],
+    "optimized_cta_button_text": "Comprar Ahora con Envío Seguro →",
+    "trust_guarantee_microcopy": "Garantía de satisfacción de 30 días"
+  }
+}`;
 
 function getRankTitleForScore(score) {
   if (score >= 90) return 'Leyenda del Checkout';
@@ -351,9 +271,9 @@ function normalizeLiveOrFallbackReport(raw) {
     return Math.max(8, Math.min(92, Math.round(val)));
   };
 
-  const overall_score = clampScore(raw.overall_score, 0);
+  const overall_score = clampScore(raw?.overall_score, 0);
   const rank_title =
-    typeof raw.rank_title === 'string' && raw.rank_title.trim()
+    typeof raw?.rank_title === 'string' && raw.rank_title.trim()
       ? raw.rank_title.trim()
       : overall_score === 0
       ? 'Imagen No Comercial'
@@ -361,7 +281,7 @@ function normalizeLiveOrFallbackReport(raw) {
 
   let estimated_lost_sales_percentage = '0%';
   if (
-    typeof raw.estimated_lost_sales_percentage === 'string' &&
+    typeof raw?.estimated_lost_sales_percentage === 'string' &&
     raw.estimated_lost_sales_percentage.trim()
   ) {
     const clean = raw.estimated_lost_sales_percentage.trim();
@@ -369,23 +289,23 @@ function normalizeLiveOrFallbackReport(raw) {
   }
 
   const summary_verdict =
-    typeof raw.summary_verdict === 'string' ? raw.summary_verdict.trim() : '';
+    typeof raw?.summary_verdict === 'string' ? raw.summary_verdict.trim() : '';
 
   const detected_product_name =
-    typeof raw.detected_product_name === 'string' && raw.detected_product_name.trim()
+    typeof raw?.detected_product_name === 'string' && raw.detected_product_name.trim()
       ? raw.detected_product_name.trim()
       : 'No detectado en la captura';
 
   const detected_product_price =
-    typeof raw.detected_product_price === 'string' && raw.detected_product_price.trim()
+    typeof raw?.detected_product_price === 'string' && raw.detected_product_price.trim()
       ? raw.detected_product_price.trim()
       : 'No visible';
 
   const sub_scores = {
-    visual_clarity: clampScore(raw.sub_scores?.visual_clarity, 0),
-    cta_power: clampScore(raw.sub_scores?.cta_power, 0),
-    trust_and_security: clampScore(raw.sub_scores?.trust_and_security, 0),
-    copywriting_persuasion: clampScore(raw.sub_scores?.copywriting_persuasion, 0),
+    visual_clarity: clampScore(raw?.sub_scores?.visual_clarity, 0),
+    cta_power: clampScore(raw?.sub_scores?.cta_power, 0),
+    trust_and_security: clampScore(raw?.sub_scores?.trust_and_security, 0),
+    copywriting_persuasion: clampScore(raw?.sub_scores?.copywriting_persuasion, 0),
   };
 
   const sanitizeLiveMission = (item, forcedId) => ({
@@ -411,17 +331,17 @@ function normalizeLiveOrFallbackReport(raw) {
     y_percent: clampCoord(item?.y_percent, 50),
   });
 
-  const rawFree = Array.isArray(raw.free_critical_missions) ? raw.free_critical_missions : [];
+  const rawFree = Array.isArray(raw?.free_critical_missions) ? raw.free_critical_missions : [];
   const free_critical_missions = rawFree.map((m, idx) =>
     sanitizeLiveMission(m, idx + 1)
   );
 
-  const rawPro = Array.isArray(raw.pro_locked_missions) ? raw.pro_locked_missions : [];
+  const rawPro = Array.isArray(raw?.pro_locked_missions) ? raw.pro_locked_missions : [];
   const pro_locked_missions = rawPro.map((m, idx) =>
     sanitizeLiveMission(m, idx + 1 + free_critical_missions.length)
   );
 
-  const rawBullets = Array.isArray(raw.pro_ai_copywriting_pack?.optimized_bullet_benefits)
+  const rawBullets = Array.isArray(raw?.pro_ai_copywriting_pack?.optimized_bullet_benefits)
     ? raw.pro_ai_copywriting_pack.optimized_bullet_benefits
         .filter((b) => typeof b === 'string' && b.trim().length > 0)
         .map((b) => b.trim())
@@ -429,16 +349,16 @@ function normalizeLiveOrFallbackReport(raw) {
 
   const pro_ai_copywriting_pack = {
     optimized_product_title:
-      typeof raw.pro_ai_copywriting_pack?.optimized_product_title === 'string'
+      typeof raw?.pro_ai_copywriting_pack?.optimized_product_title === 'string'
         ? raw.pro_ai_copywriting_pack.optimized_product_title.trim()
         : '',
     optimized_bullet_benefits: rawBullets,
     optimized_cta_button_text:
-      typeof raw.pro_ai_copywriting_pack?.optimized_cta_button_text === 'string'
+      typeof raw?.pro_ai_copywriting_pack?.optimized_cta_button_text === 'string'
         ? raw.pro_ai_copywriting_pack.optimized_cta_button_text.trim()
         : '',
     trust_guarantee_microcopy:
-      typeof raw.pro_ai_copywriting_pack?.trust_guarantee_microcopy === 'string'
+      typeof raw?.pro_ai_copywriting_pack?.trust_guarantee_microcopy === 'string'
         ? raw.pro_ai_copywriting_pack.trust_guarantee_microcopy.trim()
         : '',
   };
@@ -454,13 +374,13 @@ function normalizeLiveOrFallbackReport(raw) {
     free_critical_missions,
     pro_locked_missions,
     pro_ai_copywriting_pack,
-    audit_source: raw.audit_source || 'live_gemini',
+    audit_source: raw?.audit_source || 'live_gemini',
   };
 
-  if (typeof raw.engine_notes === 'string' && raw.engine_notes.trim()) {
+  if (typeof raw?.engine_notes === 'string' && raw.engine_notes.trim()) {
     liveResult.engine_notes = raw.engine_notes.trim();
   }
-  if (typeof raw.captured_image_url === 'string' && raw.captured_image_url.trim()) {
+  if (typeof raw?.captured_image_url === 'string' && raw.captured_image_url.trim()) {
     liveResult.captured_image_url = raw.captured_image_url.trim();
   }
 
@@ -635,103 +555,118 @@ export function buildHeuristicCustomAudit(params) {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  try {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método no permitido. Usa POST /api/audit.' });
-  }
-
-  let body = {};
-  if (typeof req.body === 'string') {
-    try {
-      body = JSON.parse(req.body);
-    } catch {
-      return res.status(400).json({ error: 'El cuerpo de la petición no es un JSON válido.' });
-    }
-  } else if (req.body && typeof req.body === 'object') {
-    body = req.body;
-  }
-
-  const {
-    imageBase64,
-    mimeType = 'image/jpeg',
-    storeUrl = '',
-    platform = 'Shopify',
-    productCopy = '',
-    presetId = '',
-  } = body;
-
-  const cleanUrl = typeof storeUrl === 'string' ? storeUrl.trim() : '';
-  const scrapedMeta = cleanUrl ? await fetchStorePageMetadata(cleanUrl) : null;
-
-  let effectiveBase64 =
-    typeof imageBase64 === 'string' && imageBase64.length > 50 ? imageBase64 : '';
-  let effectiveMimeType = mimeType || 'image/jpeg';
-  let capturedImageUrl = undefined;
-
-  if (!effectiveBase64 && cleanUrl) {
-    const thumIoUrl = `https://image.thum.io/get/width/1200/crop/800/noanimate/${cleanUrl}`;
-    if (scrapedMeta?.ogImageUrl) {
-      const ogFetched = await fetchRemoteImageAsBase64(scrapedMeta.ogImageUrl, 4000);
-      if (ogFetched) {
-        effectiveBase64 = ogFetched.base64;
-        effectiveMimeType = ogFetched.mimeType;
-        capturedImageUrl = ogFetched.dataUrl;
-      } else {
-        capturedImageUrl = scrapedMeta.ogImageUrl;
-      }
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
     }
 
-    if (!capturedImageUrl && (scrapedMeta || !String(productCopy).trim())) {
-      const thumFetched = await fetchRemoteImageAsBase64(thumIoUrl, 4500);
-      if (thumFetched) {
-        effectiveBase64 = thumFetched.base64;
-        effectiveMimeType = thumFetched.mimeType;
-        capturedImageUrl = thumFetched.dataUrl;
-      } else {
-        capturedImageUrl = thumIoUrl;
-      }
-    }
-  }
-
-  const apiKey =
-    process.env.GEMINI_API_KEY ||
-    process.env.API_KEY ||
-    process.env.VITE_GEMINI_API_KEY ||
-    process.env.GOOGLE_API_KEY;
-
-  const isCustomUserAudit = !presetId || !String(presetId).trim();
-
-  if (!apiKey || apiKey === 'MY_GEMINI_API_KEY') {
-    const msg =
-      'GEMINI_API_KEY no está configurada en el servidor.';
-
-    if (isCustomUserAudit) {
-      return res.status(400).json({
-        error:
-          'GEMINI_API_KEY no está configurada en las variables de entorno de Vercel (Project Settings → Environment Variables). Agrégala y haz un Redeploy.',
+    if (req.method === 'GET') {
+      const hasKey = Boolean(
+        process.env.GEMINI_API_KEY ||
+        process.env.VITE_GEMINI_API_KEY ||
+        process.env.API_KEY ||
+        process.env.GOOGLE_API_KEY
+      );
+      return res.status(200).json({
+        ok: true,
+        hasGeminiKey: hasKey,
+        serverTime: new Date().toISOString(),
       });
     }
 
-    const report = buildHeuristicCustomAudit({
-      platform,
-      storeUrl: cleanUrl,
-      productCopy,
-      presetId,
-      scrapedMeta,
-      capturedImageUrl,
-      engineNotes: msg,
-    });
-    return res.status(200).json(report);
-  }
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Método no permitido. Usa POST /api/audit.' });
+    }
 
-  try {
+    let body = {};
+    if (typeof req.body === 'string') {
+      try {
+        body = JSON.parse(req.body);
+      } catch {
+        return res.status(400).json({ error: 'El cuerpo de la petición no es un JSON válido.' });
+      }
+    } else if (req.body && typeof req.body === 'object') {
+      body = req.body;
+    }
+
+    const {
+      customApiKey = '',
+      imageBase64,
+      mimeType = 'image/jpeg',
+      storeUrl = '',
+      platform = 'Shopify',
+      productCopy = '',
+      presetId = '',
+    } = body;
+
+    const cleanUrl = typeof storeUrl === 'string' ? storeUrl.trim() : '';
+    const scrapedMeta = cleanUrl ? await fetchStorePageMetadata(cleanUrl) : null;
+
+    let effectiveBase64 =
+      typeof imageBase64 === 'string' && imageBase64.length > 50 ? imageBase64 : '';
+    let effectiveMimeType = mimeType || 'image/jpeg';
+    let capturedImageUrl = undefined;
+
+    if (!effectiveBase64 && cleanUrl) {
+      const thumIoUrl = `https://image.thum.io/get/width/1200/crop/800/noanimate/${cleanUrl}`;
+      if (scrapedMeta?.ogImageUrl) {
+        const ogFetched = await fetchRemoteImageAsBase64(scrapedMeta.ogImageUrl, 4000);
+        if (ogFetched) {
+          effectiveBase64 = ogFetched.base64;
+          effectiveMimeType = ogFetched.mimeType;
+          capturedImageUrl = ogFetched.dataUrl;
+        } else {
+          capturedImageUrl = scrapedMeta.ogImageUrl;
+        }
+      }
+
+      if (!capturedImageUrl && (scrapedMeta || !String(productCopy).trim())) {
+        const thumFetched = await fetchRemoteImageAsBase64(thumIoUrl, 4500);
+        if (thumFetched) {
+          effectiveBase64 = thumFetched.base64;
+          effectiveMimeType = thumFetched.mimeType;
+          capturedImageUrl = thumFetched.dataUrl;
+        } else {
+          capturedImageUrl = thumIoUrl;
+        }
+      }
+    }
+
+    const apiKey =
+      (typeof customApiKey === 'string' && customApiKey.trim() ? customApiKey.trim() : '') ||
+      process.env.GEMINI_API_KEY ||
+      process.env.VITE_GEMINI_API_KEY ||
+      process.env.API_KEY ||
+      process.env.GOOGLE_API_KEY;
+
+    const isCustomUserAudit = !presetId || !String(presetId).trim();
+
+    if (!apiKey || apiKey === 'MY_GEMINI_API_KEY') {
+      const msg = 'GEMINI_API_KEY no está configurada en el servidor.';
+
+      if (isCustomUserAudit) {
+        return res.status(400).json({
+          error:
+            'GEMINI_API_KEY no detectada en el servidor. Puedes ingresar tu clave directamente en "Ajustes" (arriba a la derecha) o configurarla en las variables de entorno de Vercel.',
+        });
+      }
+
+      const report = buildHeuristicCustomAudit({
+        platform,
+        storeUrl: cleanUrl,
+        productCopy,
+        presetId,
+        scrapedMeta,
+        capturedImageUrl,
+        engineNotes: msg,
+      });
+      return res.status(200).json(report);
+    }
+
     const parts = [];
 
     if (effectiveBase64 && effectiveBase64.length > 50) {
@@ -771,7 +706,6 @@ export default async function handler(req, res) {
       generationConfig: {
         temperature: 0.3,
         responseMimeType: 'application/json',
-        responseSchema: auditResponseSchema,
       },
     };
 
@@ -797,7 +731,7 @@ export default async function handler(req, res) {
             'User-Agent': 'aistudio-build',
           },
           body: JSON.stringify(restPayload),
-          signal: AbortSignal.timeout(30000),
+          signal: AbortSignal.timeout(28000),
         });
 
         if (!geminiRes.ok) {
@@ -815,7 +749,13 @@ export default async function handler(req, res) {
           throw new Error(`Respuesta vacía o sin candidates del modelo ${modelName}.`);
         }
 
-        parsed = JSON.parse(rawJsonText);
+        const cleanJson = rawJsonText
+          .replace(/^```json\s*/i, '')
+          .replace(/^```\s*/i, '')
+          .replace(/```\s*$/i, '')
+          .trim();
+
+        parsed = JSON.parse(cleanJson);
         break;
       } catch (err) {
         lastError = err;
@@ -866,23 +806,10 @@ export default async function handler(req, res) {
     return res.status(200).json(normalized);
   } catch (error) {
     const errorDetail = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
-    console.error('[StoreLevelUp Engine] Error en llamada a Gemini REST API:', error);
+    console.error('[StoreLevelUp Engine Handler]', error);
 
-    if (isCustomUserAudit) {
-      return res.status(500).json({
-        error: `No se pudo completar el análisis en vivo con Gemini REST API (${errorDetail}). Verifica la imagen o la configuración de GEMINI_API_KEY e intenta nuevamente.`,
-      });
-    }
-
-    const fallbackReport = buildHeuristicCustomAudit({
-      platform,
-      storeUrl: cleanUrl,
-      productCopy,
-      presetId,
-      scrapedMeta,
-      capturedImageUrl,
-      engineNotes: `Fallback activado tras error en Gemini REST API (${errorDetail})`,
+    return res.status(500).json({
+      error: `No se pudo completar el análisis (${errorDetail}). Si el error persiste, puedes ingresar tu propia GEMINI_API_KEY en Ajustes (arriba a la derecha).`,
     });
-    return res.status(200).json(fallbackReport);
   }
 }

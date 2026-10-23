@@ -30,6 +30,7 @@ import {
 import { MissionListSection } from './components/MissionListSection';
 import { CopywritingAndJsonPanel } from './components/CopywritingAndJsonPanel';
 import { AuditScannerForm } from './components/AuditScannerForm';
+import { SettingsModal, LOCAL_STORAGE_GEMINI_KEY } from './components/SettingsModal';
 
 /**
  * 240° Precision Arc Gauge with crisp matte styling (Zero artificial blur or neon glows).
@@ -446,10 +447,16 @@ export default function App() {
           ? 'http://localhost:3000/api/audit'
           : '/api/audit';
 
+      const customApiKey =
+        typeof window !== 'undefined'
+          ? localStorage.getItem(LOCAL_STORAGE_GEMINI_KEY) || ''
+          : '';
+
       let res = await fetch(primaryEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          customApiKey,
           platform: activePlatform,
           storeUrl: activeStoreUrl,
           productCopy: activeRawCopy,
@@ -470,6 +477,7 @@ export default function App() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            customApiKey,
             platform: activePlatform,
             storeUrl: activeStoreUrl,
             productCopy: activeRawCopy,
@@ -538,112 +546,14 @@ export default function App() {
         </div>
       </header>
 
-      {/* Settings Modal (Clean, technical slide-over dialog) */}
-      {showSettingsModal && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="settings-modal-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm"
-          onClick={() => setShowSettingsModal(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg rounded-2xl bg-[#121110] border border-[#26221E] p-6 space-y-6 text-[#F5F3EF] shadow-2xl"
-          >
-            <div className="flex items-center justify-between pb-3 border-b border-[#1E1C1A]">
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-[#181614] border border-[#2C2722] flex items-center justify-center text-[#FF5500]">
-                  <Settings className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 id="settings-modal-title" className="text-base font-bold font-display">
-                    Ajustes de Auditoría
-                  </h3>
-                  <p className="text-[11px] text-[#8C8881]">
-                    Motor StoreLevelUp &amp; Gemini 2.5 Flash Vision
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setShowSettingsModal(false)}
-                className="p-1.5 rounded-lg text-[#8C8881] hover:text-[#F5F3EF] hover:bg-[#1A1816] transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Technical Specs & Status */}
-            <div className="space-y-3 text-xs">
-              <div className="p-3.5 rounded-xl bg-[#171513] border border-[#24201C] space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[#8C8881]">Modelo de IA:</span>
-                  <span className="font-display font-semibold text-[#FF5500]">
-                    gemini-2.5-flash (Vision Multimodal)
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[#8C8881]">Temperatura analítica:</span>
-                  <span className="font-display font-semibold text-[#F5F3EF]">0.3 (Precisión CRO)</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[#8C8881]">Detección de coordenadas:</span>
-                  <span className="font-display font-semibold text-[#CCFF00]">
-                    Activa (x%, y% en píxeles)
-                  </span>
-                </div>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="space-y-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowSettingsModal(false);
-                    setShowCopywritingDrawer(true);
-                  }}
-                  className="w-full py-2.5 px-3.5 rounded-xl bg-[#181614] hover:bg-[#201D1A] border border-[#26221E] text-xs font-semibold font-display text-[#D8D3CA] hover:text-[#F5F3EF] transition-colors flex items-center justify-between cursor-pointer"
-                >
-                  <span className="flex items-center gap-2">
-                    <FileCode className="w-4 h-4 text-[#FF5500]" />
-                    <span>Ver Pack de Copywriting IA &amp; JSON</span>
-                  </span>
-                  <span>→</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowSettingsModal(false);
-                    setScreenMode(screenMode === 'report' ? 'scanner' : 'report');
-                  }}
-                  className="w-full py-2.5 px-3.5 rounded-xl bg-[#181614] hover:bg-[#201D1A] border border-[#26221E] text-xs font-semibold font-display text-[#D8D3CA] hover:text-[#F5F3EF] transition-colors flex items-center justify-between cursor-pointer"
-                >
-                  <span className="flex items-center gap-2">
-                    <Sliders className="w-4 h-4 text-[#CCFF00]" />
-                    <span>
-                      Cambiar a {screenMode === 'report' ? 'Modo Escáner' : 'Modo Reporte'}
-                    </span>
-                  </span>
-                  <span>→</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="pt-2 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setShowSettingsModal(false)}
-                className="px-4 py-2 rounded-xl bg-[#FF5500] hover:bg-[#FF661A] text-[#0C0B0A] text-xs font-bold font-display transition-colors cursor-pointer"
-              >
-                Cerrar Ajustes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Settings Modal (Vercel Serverless diagnostics & Browser direct API Key fallback) */}
+      <SettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+        onOpenCopywriting={() => setShowCopywritingDrawer(true)}
+        screenMode={screenMode}
+        onToggleScreenMode={() => setScreenMode(screenMode === 'report' ? 'scanner' : 'report')}
+      />
 
       {screenMode === 'scanner' ? (
         /* SCREEN 1: MODO ESCÁNER — Landing Page Principal */

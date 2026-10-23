@@ -23,5 +23,5 @@
     },
     "noEmit": true
   },
-  "exclude": ["dist"]
+  "exclude": ["dist", "api"]
 }

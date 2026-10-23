@@ -11,7 +11,10 @@ import {
 import {
   EcommercePlatform,
   StoreAuditReport,
+  normalizeAuditReport,
 } from '../utils/auditEngine';
+import { LOCAL_STORAGE_GEMINI_KEY } from './SettingsModal';
+import { SYSTEM_INSTRUCTION } from '../../api/audit.js';
 
 interface AuditScannerFormProps {
   defaultPlatform: EcommercePlatform;
@@ -101,6 +104,94 @@ function compressImageFileToJpegDataUrl(
   });
 }
 
+async function performClientDirectGeminiAudit(params: {
+  apiKey: string;
+  platform: EcommercePlatform;
+  storeUrl: string;
+  productCopy: string;
+  imageBase64: string | null;
+  mimeType: string;
+}): Promise<StoreAuditReport> {
+  const { apiKey, platform, storeUrl, productCopy, imageBase64, mimeType } = params;
+  const parts: any[] = [];
+
+  if (imageBase64 && imageBase64.length > 50) {
+    const cleanBase64 = imageBase64.replace(/^data:[^;]+;base64,/, '');
+    parts.push({
+      inlineData: {
+        mimeType: mimeType || 'image/jpeg',
+        data: cleanBase64,
+      },
+    });
+  }
+
+  const contextLines = [
+    `Plataforma de e-commerce seleccionada: ${platform}`,
+    storeUrl ? `URL de la página de producto: ${storeUrl}` : '',
+    productCopy ? `Texto / Descripción proporcionada por el usuario: ${productCopy}` : '',
+    'INSTRUCCIÓN CRÍTICA DE INSPECCIÓN VISUAL: Analiza exclusivamente los píxeles reales de la imagen adjunta (y los datos reales del producto si se adjuntaron). Aplica estrictamente la Regla A (si la imagen NO es una página de producto o tienda online, devuelve overall_score: 0 y explica en summary_verdict qué ves realmente en la imagen), la Regla B (cita entre comillas los textos exactos, precios, colores y posiciones reales en cada problem_detected y quick_fix_5min, sin consejos genéricos) y la Regla C (escribe en visual_evidence_detected qué elemento exacto ves en las coordenadas x_percent e y_percent de la captura).',
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+
+  parts.push({ text: contextLines });
+
+  const candidateModels = [
+    'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-3.5-flash-lite',
+    'gemini-1.5-flash',
+  ];
+
+  let lastError: unknown = null;
+
+  for (const model of candidateModels) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'aistudio-build',
+        },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+          contents: [{ role: 'user', parts }],
+          generationConfig: {
+            temperature: 0.3,
+            responseMimeType: 'application/json',
+          },
+        }),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`HTTP ${res.status}: ${errText.slice(0, 150)}`);
+      }
+
+      const data = await res.json();
+      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!rawText) throw new Error('Respuesta vacía de Gemini');
+
+      const cleanJson = rawText
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/```\s*$/i, '')
+        .trim();
+
+      const parsed = JSON.parse(cleanJson);
+      parsed.audit_source = 'live_gemini';
+      parsed.engine_notes = `Auditoría directa desde el navegador (Gemini ${model} REST) completada con éxito.`;
+      if (imageBase64) parsed.captured_image_url = imageBase64;
+      return normalizeAuditReport(parsed, 'shopify-sneaker');
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error('No se pudo completar el análisis directo con Gemini');
+}
+
 export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
   defaultPlatform,
   onAuditCompleted,
@@ -143,6 +234,15 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
     setValidationError(null);
     setIsSubmitting(true);
 
+    const savedCustomKey =
+      typeof window !== 'undefined'
+        ? localStorage.getItem(LOCAL_STORAGE_GEMINI_KEY) || ''
+        : '';
+    const fallbackClientKey =
+      savedCustomKey ||
+      ((import.meta as any).env?.VITE_GEMINI_API_KEY as string | undefined) ||
+      '';
+
     try {
       const primaryEndpoint =
         typeof window !== 'undefined' &&
@@ -153,6 +253,7 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
           : '/api/audit';
 
       const requestPayload = JSON.stringify({
+        customApiKey: savedCustomKey,
         platform,
         storeUrl: storeUrl.trim(),
         productCopy: productCopy.trim(),
@@ -160,94 +261,97 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
         mimeType: imageMimeType,
       });
 
-      let response = await fetch(primaryEndpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: requestPayload,
-      });
+      let response: Response | null = null;
+      let networkError: unknown = null;
 
-      // Fallback if relative /api/audit returned 404 in local Vite dev
-      if (
-        !response.ok &&
-        response.status === 404 &&
-        primaryEndpoint === '/api/audit' &&
-        typeof window !== 'undefined' &&
-        window.location.hostname === 'localhost'
-      ) {
-        response = await fetch('http://localhost:3000/api/audit', {
+      try {
+        response = await fetch(primaryEndpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: requestPayload,
         });
+
+        // Fallback if relative /api/audit returned 404 in local Vite dev
+        if (
+          !response.ok &&
+          response.status === 404 &&
+          primaryEndpoint === '/api/audit' &&
+          typeof window !== 'undefined' &&
+          window.location.hostname === 'localhost'
+        ) {
+          response = await fetch('http://localhost:3000/api/audit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: requestPayload,
+          });
+        }
+      } catch (netErr) {
+        networkError = netErr;
       }
 
-      const rawText = await response.text();
-      let parsedJson: Record<string, any> | null = null;
-      try {
-        parsedJson = rawText ? JSON.parse(rawText) : null;
-      } catch {
-        parsedJson = null;
+      // If server responded OK
+      if (response && response.ok) {
+        const rawText = await response.text();
+        const parsedJson = rawText ? JSON.parse(rawText) : null;
+        if (parsedJson && typeof parsedJson.overall_score === 'number') {
+          const report = parsedJson as StoreAuditReport;
+          onAuditCompleted(report, {
+            platform,
+            storeUrl: storeUrl.trim(),
+            productCopy: productCopy.trim(),
+            uploadedImageUrl: imagePreview || report.captured_image_url || null,
+          });
+          return;
+        }
       }
 
-      if (!response.ok) {
-        if (parsedJson && typeof parsedJson.error === 'string') {
-          throw new Error(parsedJson.error);
-        }
+      // If server failed, try direct client-side fallback with Gemini REST API
+      if (fallbackClientKey) {
+        try {
+          const directReport = await performClientDirectGeminiAudit({
+            apiKey: fallbackClientKey,
+            platform,
+            storeUrl: storeUrl.trim(),
+            productCopy: productCopy.trim(),
+            imageBase64: imagePreview,
+            mimeType: imageMimeType,
+          });
 
-        const cleanSnippet = rawText
-          .replace(/<[^>]*>/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim()
-          .slice(0, 180);
+          onAuditCompleted(directReport, {
+            platform,
+            storeUrl: storeUrl.trim(),
+            productCopy: productCopy.trim(),
+            uploadedImageUrl: imagePreview || directReport.captured_image_url || null,
+          });
+          return;
+        } catch (directErr) {
+          console.error('[StoreLevelUp Client Direct Fallback Error]', directErr);
+        }
+      }
 
-        if (response.status === 413) {
-          throw new Error(
-            `Error 413 (Payload Too Large): La imagen supera el límite permitido por el servidor (${cleanSnippet || 'FUNCTION_PAYLOAD_TOO_LARGE'}).`
-          );
+      // If server had a structured error message
+      if (response && !response.ok) {
+        const errJson = (await response.json().catch(() => null)) as { error?: string } | null;
+        if (errJson?.error) {
+          throw new Error(errJson.error);
         }
-        if (response.status === 404) {
-          throw new Error(
-            `Error 404: El endpoint /api/audit no fue encontrado en el servidor (${cleanSnippet || 'NOT_FOUND'}).`
-          );
-        }
-        if (response.status === 504) {
-          throw new Error(
-            `Error 504 (Timeout): El análisis de IA superó el tiempo límite de espera en el servidor (${cleanSnippet || 'GATEWAY_TIMEOUT'}). Intenta nuevamente.`
-          );
-        }
-
         throw new Error(
-          `Error del servidor (${response.status} ${response.statusText || ''}): ${
-            cleanSnippet || 'Respuesta no válida desde /api/audit.'
-          }`.trim()
+          `Error en servidor (${response.status}). Puedes ingresar tu GEMINI_API_KEY en 'Ajustes' (icono de tuerca arriba) para auditar directamente desde el navegador.`
         );
       }
 
-      if (!parsedJson || typeof parsedJson.overall_score !== 'number') {
-        const cleanSnippet = rawText
-          .replace(/<[^>]*>/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim()
-          .slice(0, 180);
+      if (networkError) {
         throw new Error(
-          `La ruta /api/audit devolvió una respuesta que no es JSON válido (status ${response.status}): ${
-            cleanSnippet || 'Respuesta vacía o HTML inesperado.'
-          }`
+          'No se pudo conectar con el servidor. Puedes ingresar tu GEMINI_API_KEY en "Ajustes" (arriba a la derecha) para auditar directamente desde tu navegador.'
         );
       }
 
-      const report = parsedJson as StoreAuditReport;
-      onAuditCompleted(report, {
-        platform,
-        storeUrl: storeUrl.trim(),
-        productCopy: productCopy.trim(),
-        uploadedImageUrl: imagePreview || report.captured_image_url || null,
-      });
+      throw new Error(
+        'El servidor devolvió una respuesta no válida. Ingresa tu clave en "Ajustes" para auditar directamente.'
+      );
     } catch (err) {
       setValidationError(
-        err instanceof Error
-          ? err.message
-          : 'Error inesperado al auditar la página.'
+        err instanceof Error ? err.message : 'Error inesperado al auditar la página.'
       );
     } finally {
       setIsSubmitting(false);

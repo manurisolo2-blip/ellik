@@ -182,11 +182,18 @@ test('api/audit Vercel serverless handler responds to OPTIONS, rejects GET with 
   assert.equal(optRes.statusCode, 200);
   assert.equal(optRes.ended, true);
 
-  // 2. GET request -> 405
+  // 2. GET request -> 200 diagnostic
   const getRes = createMockRes();
   await auditHandler({ method: 'GET' }, getRes);
-  assert.equal(getRes.statusCode, 405);
-  assert.ok(getRes.body?.error);
+  assert.equal(getRes.statusCode, 200);
+  assert.equal(getRes.body?.ok, true);
+  assert.equal(typeof getRes.body?.hasGeminiKey, 'boolean');
+
+  // 3. PUT request -> 405
+  const putRes = createMockRes();
+  await auditHandler({ method: 'PUT' }, putRes);
+  assert.equal(putRes.statusCode, 405);
+  assert.ok(putRes.body?.error);
 
   // 3. POST request with presetId when GEMINI_API_KEY is unset -> returns valid StoreAuditReport
   const prevKey = process.env.GEMINI_API_KEY;
