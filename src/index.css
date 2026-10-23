@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --bg-espresso: #0C0B0A;
+    --surface-card: #161513;
+    --surface-elevated: #1E1C19;
+    --accent-orange: #FF5500;
+    --accent-volt: #CCFF00;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #0C0B0A;
+    color: #F5F3EF;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-display,
+  .font-metric,
+  .font-mono-tabular {
+    font-family: var(--font-display);
+    font-feature-settings: "tnum" 1;
+    font-variant-numeric: tabular-nums;
+    text-wrap: balance;
+  }
+}
+
+/* Subtle analog film grain overlay (3.8% opacity) */
+.ellik-film-grain {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  opacity: 0.038;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
