@@ -14,7 +14,7 @@ import {
   normalizeAuditReport,
 } from '../utils/auditEngine';
 import { LOCAL_STORAGE_GEMINI_KEY } from './SettingsModal';
-import { SYSTEM_INSTRUCTION } from '../../api/audit.js';
+import { SYSTEM_INSTRUCTION } from '../utils/auditPrompt';
 
 interface AuditScannerFormProps {
   defaultPlatform: EcommercePlatform;
