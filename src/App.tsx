@@ -100,7 +100,7 @@ const ConversionArcGauge: React.FC<{
               y1={t.inner.y}
               x2={t.outer.x}
               y2={t.outer.y}
-              stroke={t.isActiveTick ? '#FF5500' : '#221F1C'}
+              stroke={t.isActiveTick ? '#38BDF8' : '#1E293B'}
               strokeWidth={i % 4 === 0 ? '1.5' : '1'}
             />
           ))}
@@ -111,7 +111,7 @@ const ConversionArcGauge: React.FC<{
             cy={cy}
             r={r - 12}
             fill="none"
-            stroke="#1D1A18"
+            stroke="#1E293B"
             strokeWidth="1"
             strokeDasharray="3 3"
           />
@@ -120,17 +120,17 @@ const ConversionArcGauge: React.FC<{
           <path
             d={describeArc(startAngle, endAngle, r)}
             fill="none"
-            stroke="#1E1C1A"
+            stroke="#0F172A"
             strokeWidth="8"
             strokeLinecap="round"
           />
 
-          {/* Active Cinema Orange progress arc (crisp solid, no fuzzy glow) */}
+          {/* Active Cyan / Ice progress arc */}
           {clamped > 0 && (
             <path
               d={describeArc(startAngle, Math.max(startAngle + 2, activeAngle), r)}
               fill="none"
-              stroke="#FF5500"
+              stroke="#38BDF8"
               strokeWidth="8"
               strokeLinecap="round"
             />
@@ -142,18 +142,18 @@ const ConversionArcGauge: React.FC<{
           <div className="flex items-baseline font-display tracking-tight">
             <span
               data-testid="overall-score-value"
-              className="text-[40px] leading-none font-bold text-[#FF5500]"
+              className="text-[40px] leading-none font-bold text-[#38BDF8]"
             >
               {clamped}
             </span>
-            <span className="text-2xl leading-none font-bold text-[#F5F3EF]">
+            <span className="text-2xl leading-none font-bold text-white">
               /100
             </span>
           </div>
 
           <span
             data-testid="rank-title-value"
-            className="mt-3 text-xs font-semibold font-display text-[#FF661A] tracking-wide"
+            className="mt-3 text-xs font-semibold font-display text-white/90 tracking-wide"
           >
             {rankTitle}
           </span>
@@ -161,11 +161,11 @@ const ConversionArcGauge: React.FC<{
       </div>
 
       {/* Estimated Lost Sales caption */}
-      <div className="-mt-1 text-xs text-[#B8B3AA] font-sans text-center">
+      <div className="-mt-1 text-xs text-white/70 font-sans text-center">
         <span>Fuga de ventas estimada: </span>
         <span
           data-testid="lost-sales-value"
-          className="font-semibold text-[#F5F3EF] font-display"
+          className="font-semibold text-white font-display"
         >
           {formattedLostSales}
         </span>
@@ -202,7 +202,7 @@ const ConversionProjectionChart: React.FC<{
             y1={y}
             x2="228"
             y2={y}
-            stroke="#1D1A18"
+            stroke="#1E293B"
             strokeWidth="1"
           />
         ))}
@@ -211,22 +211,22 @@ const ConversionProjectionChart: React.FC<{
         <path
           d={baselineCurve}
           fill="none"
-          stroke="#383028"
+          stroke="#475569"
           strokeWidth="1.5"
           strokeLinecap="round"
         />
 
-        {/* Primary Cinema Orange trajectory curve */}
+        {/* Primary Cyan / Ice trajectory curve */}
         <path
           d={orangeCurve}
           fill="none"
-          stroke="#FF5500"
+          stroke="#38BDF8"
           strokeWidth="2"
           strokeLinecap="round"
         />
       </svg>
 
-      <div className="mt-1 text-xs font-semibold font-display text-[#C7C3BC] text-center">
+      <div className="mt-1 text-xs font-semibold font-display text-white/80 text-center">
         Proyección de Conversión
       </div>
     </div>
@@ -293,7 +293,7 @@ const SubScoresRadarPentagon: React.FC<{
             key={level}
             points={buildPolygonPoints(level)}
             fill="none"
-            stroke="#1E1C1A"
+            stroke="#1E293B"
             strokeWidth="1"
           />
         ))}
@@ -308,17 +308,17 @@ const SubScoresRadarPentagon: React.FC<{
               y1={cy}
               x2={outer.x}
               y2={outer.y}
-              stroke="#1E1C1A"
+              stroke="#1E293B"
               strokeWidth="1"
             />
           );
         })}
 
-        {/* Active Translucent Orange Polygon */}
+        {/* Active Translucent Cyan Polygon */}
         <polygon
           points={dataPolygonString}
-          fill="rgba(255, 85, 0, 0.08)"
-          stroke="#FF5500"
+          fill="rgba(56, 189, 248, 0.15)"
+          stroke="#38BDF8"
           strokeWidth="1.5"
         />
 
@@ -329,8 +329,8 @@ const SubScoresRadarPentagon: React.FC<{
             cx={pt.x}
             cy={pt.y}
             r="2.5"
-            fill="#FF5500"
-            stroke="#0C0B0A"
+            fill="#38BDF8"
+            stroke="#060913"
             strokeWidth="1"
           />
         ))}
@@ -344,7 +344,7 @@ const SubScoresRadarPentagon: React.FC<{
               x={outer.x + a.labelOffset.dx}
               y={outer.y + a.labelOffset.dy}
               textAnchor="middle"
-              fill="#A8A39B"
+              fill="rgba(255, 255, 255, 0.75)"
               fontSize="11"
               fontWeight="500"
               fontFamily="Plus Jakarta Sans, sans-serif"
@@ -501,12 +501,15 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0C0B0A] text-[#F5F3EF] flex flex-col relative selection:bg-[#FF5500] selection:text-[#0C0B0A] w-full">
-      {/* Ambient Atmospheric Lighting & Grid Pattern for authentic Glassmorphism refraction */}
-      <div className="ellik-ambient-canvas" aria-hidden="true" />
+    <div className="min-h-screen bg-[#060913] text-[#F8FAFC] flex flex-col relative selection:bg-[#38BDF8] selection:text-[#060913] w-full">
+      {/* 3D Volumetric Depth Backdrop (Refracting through Frosted Glass matching user reference) */}
+      <div className="ellik-glass-depth-backdrop" aria-hidden="true">
+        <div className="ellik-volumetric-pill-1" />
+        <div className="ellik-volumetric-pill-2" />
+        <div className="ellik-volumetric-pill-3" />
+        <div className="ellik-volumetric-orb-center" />
+      </div>
       <div className="ellik-grid-pattern" aria-hidden="true" />
-
-      {/* Subtle analog film grain overlay (3.2% opacity) */}
       <div className="ellik-film-grain" aria-hidden="true" />
 
       {/* TOP NAVIGATION BAR — Frosted Glassmorphism Header */}
@@ -518,13 +521,20 @@ export default function App() {
               e.preventDefault();
               setScreenMode(screenMode === 'report' ? 'scanner' : 'report');
             }}
-            className="text-2xl font-bold tracking-tight text-[#F5F3EF] font-display whitespace-nowrap shrink-0 group flex items-center gap-1"
+            className="text-2xl font-bold tracking-tight text-white font-display whitespace-nowrap shrink-0 group flex items-center gap-1"
           >
             <span>ellik</span>
-            <span className="text-[#CCFF00] inline-block transition-transform group-hover:scale-125">.</span>
+            <span className="text-[#38BDF8] inline-block transition-transform group-hover:scale-125">.</span>
           </a>
 
           <div className="flex items-center gap-2.5 shrink-0">
+            {/* Pill badges matching reference */}
+            <div className="hidden md:flex items-center gap-2 text-xs text-white/80">
+              <span className="glass-pill px-3 py-1 text-white">CRO &amp; UI/UX</span>
+              <span className="text-white/60">Multi-Plataforma</span>
+              <span className="text-white/60">Gemini 2.5 Vision</span>
+            </div>
+
             {/* Bell Notification Button */}
             <button
               type="button"
@@ -532,19 +542,19 @@ export default function App() {
               disabled={isRunningLiveAi}
               title="Notificaciones y estado de motor Gemini Vision"
               aria-label="Notificaciones"
-              className="p-2.5 rounded-xl glass-button-ghost text-[#A6A29A] hover:text-[#F5F3EF] cursor-pointer"
+              className="p-2.5 rounded-full glass-button-ghost text-white/80 hover:text-white cursor-pointer"
             >
               <Bell className="w-4 h-4" />
             </button>
 
-            {/* Ajustes Button with Gear / Nut Wheel ("ruedita estilo tuerca") */}
+            {/* Ajustes Button with Gear / Nut Wheel */}
             <button
               type="button"
               onClick={() => setShowSettingsModal(true)}
               aria-label="Ajustes de auditoría y configuración"
-              className="px-3.5 py-2 rounded-xl glass-button-ghost text-xs font-medium text-[#D8D3CA] hover:text-[#F5F3EF] flex items-center gap-2 cursor-pointer group"
+              className="px-3.5 py-1.5 rounded-full glass-pill-interactive text-xs font-medium text-white flex items-center gap-2 cursor-pointer group"
             >
-              <Settings className="w-4 h-4 text-[#A6A29A] group-hover:text-[#FF5500] transition-transform duration-500 group-hover:rotate-90 shrink-0" />
+              <Settings className="w-3.5 h-3.5 text-white/80 group-hover:text-white transition-transform duration-500 group-hover:rotate-90 shrink-0" />
               <span>Ajustes</span>
             </button>
           </div>
@@ -567,27 +577,51 @@ export default function App() {
           data-testid="scanner-screen"
           className="flex-1 w-full max-w-[1160px] mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8 relative z-10"
         >
-          <div className="flex items-center justify-between gap-4">
-            <div className="text-xs font-bold font-display text-[#FF5500] tracking-wider uppercase px-3 py-1 rounded-full glass-pill w-fit">
-              Auditoría Visual de Conversión · Shopify · Tiendanube · WooCommerce · MercadoLibre
+          {/* HERO GLASS CARD (Composition styled directly like the user reference) */}
+          <section className="glass-panel p-6 sm:p-10 space-y-6 max-w-4xl mx-auto">
+            {/* Top Tag Row */}
+            <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-3">
+                <span className="glass-pill px-3.5 py-1 text-white font-medium">
+                  Fácil de Usar
+                </span>
+                <span className="text-white/70 hidden sm:inline">Modos Claro &amp; Oscuro</span>
+                <span className="text-white/70 hidden md:inline">Auditoría Visual CRO</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setScreenMode('report')}
+                className="glass-pill-interactive px-3.5 py-1 text-xs text-white flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>Ver Modo Reporte</span>
+                <span>→</span>
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setScreenMode('report')}
-              className="px-4 py-2 rounded-xl glass-button-ghost text-xs font-medium text-[#E6E2DC] hover:text-[#F5F3EF] hover:border-[#FF5500] transition-colors cursor-pointer"
-            >
-              Ir a Modo Reporte →
-            </button>
-          </div>
 
-          <div id="escaner-principal" className="space-y-3 max-w-4xl">
-            <h1 className="text-3xl sm:text-5xl font-bold text-[#F5F3EF] font-display tracking-tight leading-[1.08]">
-              Detecta por qué tu tienda pierde ventas y corrígelo en 5 minutos.
-            </h1>
-            <p className="text-sm sm:text-base text-[#A6A29A] leading-relaxed pt-1">
-              Sube una captura de tu página de producto o pega su URL. Inspeccionamos píxel por píxel la jerarquía del botón de compra, el precio, las garantías y reescribimos tu copywriting.
-            </p>
-          </div>
+            {/* Main Headline */}
+            <div className="space-y-1">
+              <h1 className="text-4xl sm:text-6xl font-bold text-white font-display tracking-tight leading-[1.04]">
+                Auditoría<br />Visual CRO
+              </h1>
+              <p className="text-sm sm:text-base text-white/70 pt-2 max-w-2xl leading-relaxed">
+                Detecta por qué tu tienda online pierde ventas y reescribe tu jerarquía visual, botones y garantías con inteligencia artificial.
+              </p>
+            </div>
+
+            {/* Thin Glass Divider Line */}
+            <div className="glass-divider" />
+
+            {/* Bottom Meta Row */}
+            <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-white/70">
+              <span className="font-medium">Inspección Píxel por Píxel</span>
+              <div className="flex items-center gap-2">
+                <span className="glass-pill px-2.5 py-0.5 text-[11px]">Shopify</span>
+                <span className="glass-pill px-2.5 py-0.5 text-[11px]">Tiendanube</span>
+                <span className="glass-pill px-2.5 py-0.5 text-[11px]">WooCommerce</span>
+                <span className="glass-pill px-2.5 py-0.5 text-[11px]">MercadoLibre</span>
+              </div>
+            </div>
+          </section>
 
           <AuditScannerForm
             defaultPlatform={activePlatform}
@@ -596,18 +630,18 @@ export default function App() {
 
           <div
             id="ejemplos-reales"
-            className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-[#8C8881]"
+            className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-white/70"
           >
-            <span className="font-medium text-[#A6A29A]">Explorar diagnósticos pre-calibrados por plataforma:</span>
+            <span className="font-medium text-white/80">Explorar diagnósticos pre-calibrados por plataforma:</span>
             <div className="flex flex-wrap items-center gap-2">
               {PRESET_STORE_CASES.map((preset) => (
                 <button
                   key={preset.id}
                   type="button"
                   onClick={() => handleLoadPresetDemo(preset)}
-                  className="px-4 py-2.5 rounded-xl glass-card-interactive text-[#C7C3BC] hover:text-[#F5F3EF] font-medium whitespace-nowrap shrink-0 cursor-pointer"
+                  className="px-4 py-2 rounded-full glass-pill-interactive text-white font-medium whitespace-nowrap shrink-0 cursor-pointer"
                 >
-                  Probar ejemplo {preset.platform}
+                  Probar {preset.platform}
                 </button>
               ))}
             </div>
@@ -626,15 +660,15 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setScreenMode('scanner')}
-                className="px-4 py-2.5 rounded-xl glass-button-ghost text-xs font-medium text-[#E6E2DC] hover:text-[#F5F3EF] transition-colors flex items-center gap-2 whitespace-nowrap cursor-pointer"
+                className="px-4 py-2 rounded-full glass-pill-interactive text-xs font-medium text-white transition-colors flex items-center gap-2 whitespace-nowrap cursor-pointer"
               >
-                <ArrowLeft className="w-3.5 h-3.5 text-[#B8B3AA]" />
+                <ArrowLeft className="w-3.5 h-3.5 text-white/80" />
                 <span>Auditar otra tienda</span>
               </button>
             </div>
 
             <div className="flex items-center justify-center">
-              <h1 className="text-lg sm:text-xl font-bold font-display text-[#F5F3EF] tracking-tight">
+              <h1 className="text-lg sm:text-xl font-bold font-display text-white tracking-tight">
                 Modo Reporte
               </h1>
             </div>
@@ -642,7 +676,7 @@ export default function App() {
             <div className="flex items-center justify-end gap-2.5">
               <span
                 data-testid="xp-counter"
-                className="hidden sm:inline-flex px-3 py-1.5 rounded-xl glass-pill text-[11px] font-bold font-display text-[#CCFF00]"
+                className="hidden sm:inline-flex px-3.5 py-1.5 rounded-full glass-pill text-[11px] font-bold font-display text-[#38BDF8]"
               >
                 +{levelUp.earnedXp} / {levelUp.totalPossibleXp} XP
               </span>
@@ -651,7 +685,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setCompletedMissionIds([])}
-                  className="px-3 py-2 rounded-xl glass-button-ghost text-[11px] text-[#9E9A93] hover:text-[#F5F3EF] flex items-center gap-1 cursor-pointer"
+                  className="px-3 py-1.5 rounded-full glass-button-ghost text-[11px] text-white/80 hover:text-white flex items-center gap-1 cursor-pointer"
                   title="Reiniciar progreso de misiones"
                 >
                   <RotateCcw className="w-3 h-3" />
@@ -663,9 +697,9 @@ export default function App() {
                 type="button"
                 onClick={handleReauditCurrentWithAi}
                 disabled={isRunningLiveAi}
-                className="px-3.5 py-2 rounded-xl glass-button-ghost text-[11px] font-medium text-[#B8B3AA] hover:text-[#F5F3EF] disabled:opacity-50 transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-1.5 rounded-full glass-pill-interactive text-[11px] font-medium text-white disabled:opacity-50 transition-colors flex items-center gap-1.5 cursor-pointer"
               >
-                <RefreshCw className={`w-3 h-3 ${isRunningLiveAi ? 'animate-spin text-[#FF5500]' : ''}`} />
+                <RefreshCw className={`w-3 h-3 ${isRunningLiveAi ? 'animate-spin text-[#38BDF8]' : ''}`} />
                 <span className="hidden sm:inline">
                   {isRunningLiveAi ? 'Auditando...' : 'Re-analizar'}
                 </span>

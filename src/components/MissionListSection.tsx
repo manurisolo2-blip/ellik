@@ -34,46 +34,46 @@ export const MissionListSection: React.FC<MissionListSectionProps> = ({
         key={mission.id}
         id={`mission-card-${mission.id}`}
         onClick={() => onSelectMission(mission.id)}
-        className={`rounded-xl p-4 transition-all cursor-pointer ${
+        className={`rounded-2xl p-4 transition-all cursor-pointer ${
           isCompleted
-            ? 'bg-[#141810]/75 border border-[#384D1B] backdrop-blur-md shadow-[inset_0_1px_0_0_rgba(204,255,0,0.1)]'
+            ? 'bg-emerald-950/35 border border-emerald-400/40 backdrop-blur-md shadow-[inset_0_1px_0_0_rgba(52,211,153,0.2)]'
             : isSelected
-            ? 'glass-card-interactive border-white/20 shadow-[0_8px_28px_rgba(0,0,0,0.45),inset_0_1px_0_0_rgba(255,85,0,0.25)]'
+            ? 'glass-card-interactive border-white/40 shadow-[0_12px_32px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.4)]'
             : 'glass-card-interactive'
         }`}
       >
-        {/* Top Row: #N Orange Circle + Title on Left | +XP Bronze Pill on Right */}
+        {/* Top Row: #N Circle + Title on Left | +XP Pill on Right */}
         <div className="flex items-start justify-between gap-2.5">
           <div className="flex items-start gap-2.5 min-w-0">
             <span
               className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold font-display shrink-0 mt-0.5 ${
                 isCompleted
-                  ? 'bg-[#CCFF00] text-[#0C0B0A]'
-                  : 'bg-[#FF5500] text-[#F5F3EF]'
+                  ? 'bg-[#38BDF8] text-[#060913]'
+                  : 'bg-[#FF5500] text-white'
               }`}
             >
               #{mission.id}
             </span>
             <h3
               className={`text-[14px] font-semibold font-display leading-snug ${
-                isCompleted ? 'line-through text-[#8C8881]' : 'text-[#F5F3EF]'
+                isCompleted ? 'line-through text-white/50' : 'text-white'
               }`}
             >
               {mission.title}
             </h3>
           </div>
 
-          <span className="px-2.5 py-0.5 rounded-full bg-[#2A1B10] border border-[#6E3E19] text-[#FF8833] text-[11px] font-bold font-display whitespace-nowrap shrink-0">
+          <span className="px-2.5 py-0.5 rounded-full glass-pill text-[11px] font-bold font-display whitespace-nowrap shrink-0 text-white">
             +{mission.xp_reward} XP
           </span>
         </div>
 
         {/* Body: Solución label + quick_fix_5min */}
         <div className="mt-3 space-y-1">
-          <div className="text-[11px] font-bold text-[#F5F3EF] font-display">
+          <div className="text-[11px] font-bold text-white font-display">
             Solución
           </div>
-          <p className="text-[12px] text-[#B8B3AA] leading-relaxed">
+          <p className="text-[12px] text-white/70 leading-relaxed">
             {mission.quick_fix_5min}
           </p>
         </div>
@@ -85,10 +85,10 @@ export const MissionListSection: React.FC<MissionListSectionProps> = ({
             e.stopPropagation();
             onToggleMissionComplete(mission.id);
           }}
-          className={`mt-3.5 w-full py-2 px-3 rounded-lg text-xs font-medium font-display transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
+          className={`mt-3.5 w-full py-2 px-3 rounded-xl text-xs font-medium font-display transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
             isCompleted
-              ? 'bg-[#1D240B]/90 border border-[#4A6616] text-[#CCFF00]'
-              : 'glass-button-ghost text-[#D8D3CA] hover:text-[#F5F3EF]'
+              ? 'bg-emerald-950/60 border border-emerald-400/50 text-[#38BDF8]'
+              : 'glass-button-ghost text-white/90 hover:text-white'
           }`}
         >
           {isCompleted ? (
@@ -118,28 +118,28 @@ export const MissionListSection: React.FC<MissionListSectionProps> = ({
             onToggleProUnlock();
           }
         }}
-        className="rounded-xl p-4 glass-card-interactive cursor-pointer group"
+        className="rounded-2xl p-4 glass-card-interactive cursor-pointer group"
       >
         {/* Top Row: Muted Title on Left | "Pro 🔒" Badge on Right */}
         <div className="flex items-start justify-between gap-2.5">
-          <h3 className="text-[13px] font-semibold font-display text-[#9E9A93] group-hover:text-[#D8D3CA] transition-colors leading-snug">
+          <h3 className="text-[13px] font-semibold font-display text-white/60 group-hover:text-white transition-colors leading-snug">
             {mission.title}
           </h3>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            <span className="px-2 py-0.5 rounded glass-pill text-[10px] font-bold font-display text-[#C7C3BC]">
+            <span className="px-2 py-0.5 rounded-full glass-pill text-[10px] font-bold font-display text-white/80">
               Pro
             </span>
-            <Lock className="w-3.5 h-3.5 text-[#8C8881] group-hover:text-[#FF5500] transition-colors" />
+            <Lock className="w-3.5 h-3.5 text-white/60 group-hover:text-[#FF5500] transition-colors" />
           </div>
         </div>
 
         {/* Blurred Solución Body matching the reference mockup */}
         <div className="mt-2.5 space-y-1 select-none">
-          <div className="text-[11px] font-bold text-[#8C8881] font-display blur-[1.5px]">
+          <div className="text-[11px] font-bold text-white/60 font-display blur-[1.5px]">
             Solución
           </div>
-          <p className="text-[12px] text-[#78746D] leading-relaxed blur-[3px] group-hover:blur-[2px] transition-all">
+          <p className="text-[12px] text-white/40 leading-relaxed blur-[3px] group-hover:blur-[2px] transition-all">
             {mission.quick_fix_5min}
           </p>
         </div>
@@ -150,13 +150,13 @@ export const MissionListSection: React.FC<MissionListSectionProps> = ({
   return (
     <aside
       aria-labelledby="free-missions-heading"
-      className="glass-panel rounded-2xl p-4 sm:p-5 space-y-3.5 w-full"
+      className="glass-panel p-4 sm:p-5 space-y-3.5 w-full"
     >
       {/* Column Header matching reference image */}
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center justify-between gap-2 pb-2 border-b border-white/[0.14]">
         <h2
           id="free-missions-heading"
-          className="text-base sm:text-lg font-bold text-[#F5F3EF] font-display tracking-tight"
+          className="text-base sm:text-lg font-bold text-white font-display tracking-tight"
         >
           Misiones Críticas
         </h2>
@@ -164,7 +164,7 @@ export const MissionListSection: React.FC<MissionListSectionProps> = ({
         <button
           type="button"
           onClick={onToggleProUnlock}
-          className="text-[11px] font-semibold font-display text-[#8C8881] hover:text-[#FF5500] transition-colors flex items-center gap-1 cursor-pointer"
+          className="text-[11px] font-semibold font-display text-white/70 hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
           title={
             proUnlocked
               ? 'Volver a vista con bloqueo Pro'
@@ -185,15 +185,13 @@ export const MissionListSection: React.FC<MissionListSectionProps> = ({
         </button>
       </div>
 
-      {/* Primary 3 Critical Missions Stack (matches the 3 cards in the reference image) */}
+      {/* Primary 3 Critical Missions Stack */}
       <div className="space-y-3" data-testid="free-missions-list">
         {freeMissions.map((mission, idx) => {
           const isCompleted = completedMissionIds.includes(mission.id);
           const isSelected =
             selectedMissionId === mission.id || (selectedMissionId === null && idx === 0);
 
-          // On initial load, Card #1 is unlocked and Cards #2 & #3 display the blurred Pro preview style
-          // exactly like the reference mockup. Clicking any card or unlocking Pro reveals it immediately.
           if (idx === 0 || isSelected || isCompleted || proUnlocked) {
             return renderUnlockedCard(mission);
           }
@@ -206,7 +204,7 @@ export const MissionListSection: React.FC<MissionListSectionProps> = ({
         <button
           type="button"
           onClick={() => setShowAllProMissions((prev) => !prev)}
-          className="w-full py-2 px-3 rounded-xl bg-[#141312] border border-[#221F1C] hover:border-[#332E29] text-[11px] font-semibold font-display text-[#9E9A93] hover:text-[#F5F3EF] transition-colors flex items-center justify-between cursor-pointer"
+          className="w-full py-2.5 px-3 rounded-2xl glass-card-interactive text-[11px] font-semibold font-display text-white/80 hover:text-white transition-colors flex items-center justify-between cursor-pointer"
         >
           <span>
             {proUnlocked

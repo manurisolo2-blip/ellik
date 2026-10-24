@@ -111,24 +111,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="settings-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md select-none"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl select-none"
       onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg glass-modal p-6 space-y-6 text-[#F5F3EF]"
+        className="w-full max-w-lg glass-modal p-6 sm:p-7 space-y-6 text-white"
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+        <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.14]">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.08] backdrop-blur-md flex items-center justify-center text-[#FF5500]">
-              <Settings className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-full glass-pill flex items-center justify-center text-white">
+              <Settings className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h3 id="settings-modal-title" className="text-base font-bold font-display">
+              <h3 id="settings-modal-title" className="text-base font-bold font-display text-white">
                 Ajustes de Motor &amp; Gemini
               </h3>
-              <p className="text-[11px] text-[#8C8881]">
+              <p className="text-[11px] text-white/70">
                 Diagnóstico de Serverless y respaldo de auditoría
               </p>
             </div>
@@ -137,20 +137,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[#8C8881] hover:text-[#F5F3EF] hover:bg-white/[0.06] transition-colors cursor-pointer"
+            className="p-1.5 rounded-full text-white/70 hover:text-white hover:bg-white/[0.10] transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Server Status Section */}
-        <div className="p-4 rounded-xl bg-black/40 border border-white/[0.08] backdrop-blur-md space-y-3 text-xs">
+        <div className="p-4 rounded-2xl glass-card space-y-3 text-xs">
           <div className="flex items-center justify-between">
-            <span className="text-[#8C8881]">Servidor Vercel Serverless:</span>
+            <span className="text-white/70">Servidor Vercel Serverless:</span>
             {serverStatus.loading ? (
-              <span className="text-[#A6A29A] font-mono">Verificando...</span>
+              <span className="text-white/80 font-mono">Verificando...</span>
             ) : serverStatus.hasKey ? (
-              <span className="inline-flex items-center gap-1.5 font-semibold text-[#CCFF00]">
+              <span className="inline-flex items-center gap-1.5 font-semibold text-[#38BDF8]">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 <span>GEMINI_API_KEY activa</span>
               </span>
@@ -163,15 +163,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-[#8C8881]">Modelo preferido:</span>
-            <span className="font-display font-semibold text-[#FF5500]">
+            <span className="text-white/70">Modelo preferido:</span>
+            <span className="font-display font-semibold text-[#38BDF8]">
               gemini-2.5-flash (REST directo)
             </span>
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-[#8C8881]">Temperatura CRO:</span>
-            <span className="font-display font-semibold text-[#F5F3EF]">0.3</span>
+            <span className="text-white/70">Temperatura CRO:</span>
+            <span className="font-display font-semibold text-white">0.3</span>
           </div>
         </div>
 
@@ -180,19 +180,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <div className="space-y-1.5">
             <label
               htmlFor="custom-gemini-key-input"
-              className="text-xs font-semibold text-[#E6E2DC] font-display flex items-center justify-between"
+              className="text-xs font-semibold text-white font-display flex items-center justify-between"
             >
               <span className="flex items-center gap-1.5">
                 <Key className="w-3.5 h-3.5 text-[#FF5500]" />
                 <span>Tu Gemini API Key (Respaldo en navegador)</span>
               </span>
               {savedKey && (
-                <span className="text-[10px] text-[#CCFF00] font-normal flex items-center gap-1">
+                <span className="text-[10px] text-[#38BDF8] font-normal flex items-center gap-1">
                   <Check className="w-3 h-3" /> Clave guardada
                 </span>
               )}
             </label>
-            <p className="text-[11px] text-[#8C8881] leading-relaxed">
+            <p className="text-[11px] text-white/70 leading-relaxed">
               Si el servidor de Vercel no tiene la clave en sus variables de entorno, tu navegador
               usará automáticamente esta clave como respaldo directo sin interrumpir el análisis.
             </p>
@@ -206,11 +206,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               value={inputKey}
               onChange={(e) => setInputKey(e.target.value)}
               placeholder="Pega aquí tu clave: AIzaSy... o AQ...."
-              className="flex-1 px-3.5 py-2.5 rounded-xl glass-input text-xs text-[#F5F3EF] placeholder:text-[#5E5B54] focus:outline-none focus:ring-1 focus:ring-[#FF5500]"
+              className="flex-1 px-3.5 py-2.5 rounded-2xl glass-input text-xs text-white placeholder:text-white/40 focus:outline-none"
             />
             <button
               type="submit"
-              className="px-4 py-2.5 rounded-xl bg-[#FF5500] hover:bg-[#FF661A] text-[#0C0B0A] text-xs font-bold font-display transition-colors cursor-pointer shrink-0 shadow-[0_0_15px_rgba(255,85,0,0.25)]"
+              className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#FF5500] to-[#FF6A1F] hover:from-[#FF6A1F] hover:to-[#FF7A30] text-white text-xs font-bold font-display transition-colors cursor-pointer shrink-0 shadow-[0_4px_16px_rgba(255,85,0,0.35)] border border-white/20"
             >
               Guardar
             </button>
@@ -219,7 +219,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 type="button"
                 onClick={handleRemoveKey}
                 title="Eliminar clave guardada"
-                className="p-2.5 rounded-xl glass-button-ghost text-[#8C8881] hover:text-[#FF5500] transition-colors cursor-pointer shrink-0"
+                className="p-2.5 rounded-2xl glass-button-ghost text-white/70 hover:text-[#FF5500] transition-colors cursor-pointer shrink-0"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -227,19 +227,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
 
           {feedbackMessage && (
-            <p className="text-[11px] text-[#CCFF00] font-medium pt-1">{feedbackMessage}</p>
+            <p className="text-[11px] text-[#38BDF8] font-medium pt-1">{feedbackMessage}</p>
           )}
         </form>
 
         {/* Quick Nav Actions */}
-        <div className="pt-2 border-t border-white/[0.06] space-y-2">
+        <div className="pt-2 border-t border-white/[0.14] space-y-2">
           <button
             type="button"
             onClick={() => {
               onClose();
               onOpenCopywriting();
             }}
-            className="w-full py-2.5 px-3.5 rounded-xl glass-card-interactive text-xs font-semibold font-display text-[#D8D3CA] hover:text-[#F5F3EF] transition-colors flex items-center justify-between cursor-pointer"
+            className="w-full py-2.5 px-3.5 rounded-2xl glass-card-interactive text-xs font-semibold font-display text-white/90 hover:text-white transition-colors flex items-center justify-between cursor-pointer"
           >
             <span>Ver Pack de Copywriting IA &amp; JSON</span>
             <span>→</span>
@@ -251,7 +251,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               onClose();
               onToggleScreenMode();
             }}
-            className="w-full py-2.5 px-3.5 rounded-xl glass-card-interactive text-xs font-semibold font-display text-[#D8D3CA] hover:text-[#F5F3EF] transition-colors flex items-center justify-between cursor-pointer"
+            className="w-full py-2.5 px-3.5 rounded-2xl glass-card-interactive text-xs font-semibold font-display text-white/90 hover:text-white transition-colors flex items-center justify-between cursor-pointer"
           >
             <span>Cambiar a {screenMode === 'report' ? 'Modo Escáner' : 'Modo Reporte'}</span>
             <span>→</span>
@@ -262,7 +262,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl glass-button-ghost text-[#D8D3CA] hover:text-[#F5F3EF] text-xs font-semibold font-display transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-2xl glass-button-ghost text-white/90 hover:text-white text-xs font-semibold font-display transition-colors cursor-pointer"
           >
             Listo
           </button>

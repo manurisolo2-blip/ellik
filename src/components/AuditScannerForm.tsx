@@ -359,20 +359,20 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
   };
 
   return (
-    <div className="glass-panel rounded-2xl p-6 sm:p-9 space-y-8 w-full">
+    <div className="glass-panel p-6 sm:p-9 space-y-8 w-full">
       <form onSubmit={handleSubmit} className="space-y-8" noValidate>
         {/* Platform Selector with Frosted Glass Pills */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <label className="block text-sm font-semibold text-[#F5F3EF] font-display tracking-tight">
+            <label className="block text-sm font-semibold text-white font-display tracking-tight">
               Motor de E-Commerce
             </label>
-            <p className="text-xs text-[#9E9A93]">
+            <p className="text-xs text-white/70">
               Ajustamos las heurísticas visuales de checkout y jerarquía según tu plataforma
             </p>
           </div>
           <div
-            className="flex flex-wrap items-center gap-1.5 p-1.5 bg-black/40 backdrop-blur-md border border-white/[0.08] rounded-xl w-fit"
+            className="flex flex-wrap items-center gap-1.5 p-1.5 glass-card rounded-full w-fit"
             role="group"
             aria-label="Seleccionar plataforma de e-commerce"
           >
@@ -381,10 +381,10 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
                 key={p}
                 type="button"
                 onClick={() => setPlatform(p)}
-                className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+                className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                   platform === p
-                    ? 'bg-[#FF5500] text-[#0C0B0A] shadow-[0_2px_10px_rgba(255,85,0,0.35)]'
-                    : 'text-[#A6A29A] hover:text-[#F5F3EF] hover:bg-white/[0.05]'
+                    ? 'glass-pill bg-white/20 text-white border-white/40 shadow-[0_2px_12px_rgba(255,255,255,0.22)]'
+                    : 'text-white/70 hover:text-white hover:bg-white/[0.08]'
                 }`}
               >
                 {p}
@@ -399,7 +399,7 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
           <div className="lg:col-span-6 flex flex-col">
             <label
               htmlFor="screenshot-upload-input"
-              className="block text-sm font-semibold text-[#F5F3EF] font-display tracking-tight mb-2.5"
+              className="block text-sm font-semibold text-white font-display tracking-tight mb-2.5"
             >
               Captura de pantalla del producto
             </label>
@@ -413,17 +413,17 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
             />
 
             {imagePreview ? (
-              <div className="relative flex-1 min-h-[220px] rounded-xl bg-black/40 border border-white/[0.09] backdrop-blur-md p-5 flex flex-col items-center justify-center gap-3.5">
+              <div className="relative flex-1 min-h-[220px] rounded-2xl glass-card p-5 flex flex-col items-center justify-center gap-3.5">
                 <img
                   src={imagePreview}
                   alt="Vista previa de captura cargada"
                   referrerPolicy="no-referrer"
-                  className="max-h-44 w-auto object-contain rounded-lg shadow-lg"
+                  className="max-h-44 w-auto object-contain rounded-xl shadow-2xl border border-white/15"
                 />
                 <div className="flex items-center gap-4 text-xs">
-                  <span className="text-[#CCFF00] font-semibold inline-flex items-center gap-1.5">
+                  <span className="text-[#38BDF8] font-semibold inline-flex items-center gap-1.5">
                     <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-                    <span>Captura comprimida (JPEG ≤1280px) lista para inspección</span>
+                    <span>Captura lista para inspección</span>
                   </span>
                   <button
                     type="button"
@@ -431,7 +431,7 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
                       setImagePreview(null);
                       if (fileInputRef.current) fileInputRef.current.value = '';
                     }}
-                    className="text-[#FF5500] hover:underline font-medium cursor-pointer"
+                    className="text-[#FF5500] hover:text-[#FF7A30] hover:underline font-medium cursor-pointer"
                   >
                     Cambiar imagen
                   </button>
@@ -441,15 +441,15 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex-1 min-h-[220px] rounded-xl bg-white/[0.02] hover:bg-white/[0.04] border border-white/[0.07] hover:border-white/[0.14] backdrop-blur-md p-7 flex flex-col items-center justify-center gap-3 text-center transition-all cursor-pointer group shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
+                className="flex-1 min-h-[220px] rounded-2xl glass-card-interactive p-7 flex flex-col items-center justify-center gap-3 text-center transition-all cursor-pointer group"
               >
-                <div className="w-12 h-12 rounded-full bg-white/[0.04] group-hover:bg-[#FF5500]/10 border border-white/[0.08] group-hover:border-[#FF5500]/40 flex items-center justify-center text-[#FF5500] transition-all">
-                  <Upload className="w-5 h-5" />
+                <div className="w-12 h-12 rounded-full glass-pill flex items-center justify-center text-white group-hover:scale-105 transition-all">
+                  <Upload className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-sm font-semibold text-[#F5F3EF]">
+                <span className="text-sm font-semibold text-white">
                   Subir captura de página de producto (PNG, JPG, WebP)
                 </span>
-                <span className="text-xs text-[#9E9A93] max-w-sm leading-relaxed">
+                <span className="text-xs text-white/60 max-w-sm leading-relaxed">
                   Localizamos las coordenadas exactas del botón de compra, precio, galería y fugas de confianza
                 </span>
               </button>
@@ -461,15 +461,15 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
             <div>
               <label
                 htmlFor="store-url-input"
-                className="block text-sm font-semibold text-[#F5F3EF] font-display tracking-tight mb-1.5"
+                className="block text-sm font-semibold text-white font-display tracking-tight mb-1.5"
               >
                 URL directa del producto
               </label>
-              <p className="text-xs text-[#9E9A93] mb-2.5">
+              <p className="text-xs text-white/60 mb-2.5">
                 Si no subes una imagen, extraemos automáticamente la vista, título y precio desde tu enlace
               </p>
               <div className="relative">
-                <Globe className="w-4 h-4 text-[#78746D] absolute left-4 top-1/2 -translate-y-1/2" />
+                <Globe className="w-4 h-4 text-white/50 absolute left-4 top-1/2 -translate-y-1/2" />
                 <input
                   id="store-url-input"
                   type="url"
@@ -479,7 +479,7 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
                     if (validationError) setValidationError(null);
                   }}
                   placeholder="https://mitienda.com/products/mi-producto"
-                  className="w-full pl-11 pr-4 py-3 text-sm rounded-xl glass-input text-[#F5F3EF] placeholder:text-[#66625B] focus:outline-none"
+                  className="w-full pl-11 pr-4 py-3 text-sm rounded-2xl glass-input text-white placeholder:text-white/40 focus:outline-none"
                 />
               </div>
             </div>
@@ -487,12 +487,12 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
             <div>
               <label
                 htmlFor="product-copy-input"
-                className="block text-xs font-semibold text-[#C7C3BC] mb-2"
+                className="block text-xs font-semibold text-white/80 mb-2"
               >
                 Descripción o contexto adicional del producto (Opcional)
               </label>
               <div className="relative">
-                <FileText className="w-4 h-4 text-[#78746D] absolute left-4 top-3.5" />
+                <FileText className="w-4 h-4 text-white/50 absolute left-4 top-3.5" />
                 <textarea
                   id="product-copy-input"
                   rows={3}
@@ -502,7 +502,7 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
                     if (validationError) setValidationError(null);
                   }}
                   placeholder="Pega aquí la descripción actual, precio o detalles sobre tu embudo..."
-                  className="w-full pl-11 pr-4 py-3 text-sm rounded-xl glass-input text-[#F5F3EF] placeholder:text-[#66625B] focus:outline-none"
+                  className="w-full pl-11 pr-4 py-3 text-sm rounded-2xl glass-input text-white placeholder:text-white/40 focus:outline-none"
                 />
               </div>
             </div>
@@ -512,7 +512,7 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
         {validationError && (
           <div
             role="alert"
-            className="p-4 rounded-xl bg-[#261310]/85 border border-[#FF5500]/30 backdrop-blur-md text-xs text-[#FFB4A2] flex items-center gap-2.5"
+            className="p-4 rounded-2xl bg-[#261310]/80 border border-[#FF5500]/40 backdrop-blur-md text-xs text-[#FFB4A2] flex items-center gap-2.5"
           >
             <AlertCircle className="w-4 h-4 text-[#FF5500] shrink-0" />
             <span>{validationError}</span>
@@ -523,7 +523,7 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-4 px-6 text-sm font-bold bg-[#FF5500] hover:bg-[#FF6A1F] text-[#0C0B0A] rounded-xl disabled:opacity-60 transition-all flex items-center justify-center gap-2.5 cursor-pointer shadow-[0_8px_24px_rgba(255,85,0,0.32),inset_0_1px_0_rgba(255,255,255,0.22)]"
+            className="w-full py-4 px-6 text-sm font-bold bg-gradient-to-r from-[#FF5500] to-[#FF6A1F] hover:from-[#FF6A1F] hover:to-[#FF7A30] text-white rounded-2xl disabled:opacity-60 transition-all flex items-center justify-center gap-2.5 cursor-pointer shadow-[0_12px_32px_rgba(255,85,0,0.35),inset_0_1px_1px_rgba(255,255,255,0.45)] border border-white/20"
           >
             {isSubmitting ? (
               <>
