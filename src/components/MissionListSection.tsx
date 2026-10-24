@@ -34,12 +34,12 @@ export const MissionListSection: React.FC<MissionListSectionProps> = ({
         key={mission.id}
         id={`mission-card-${mission.id}`}
         onClick={() => onSelectMission(mission.id)}
-        className={`rounded-xl p-4 transition-all cursor-pointer border ${
+        className={`rounded-xl p-4 transition-all cursor-pointer ${
           isCompleted
-            ? 'bg-[#141810] border-[#384D1B]'
+            ? 'bg-[#141810]/75 border border-[#384D1B] backdrop-blur-md shadow-[inset_0_1px_0_0_rgba(204,255,0,0.1)]'
             : isSelected
-            ? 'bg-[#171513] border-[#3A342E]'
-            : 'bg-[#141312] border-[#221F1C] hover:border-[#332E29]'
+            ? 'glass-card-interactive border-white/20 shadow-[0_8px_28px_rgba(0,0,0,0.45),inset_0_1px_0_0_rgba(255,85,0,0.25)]'
+            : 'glass-card-interactive'
         }`}
       >
         {/* Top Row: #N Orange Circle + Title on Left | +XP Bronze Pill on Right */}
@@ -85,10 +85,10 @@ export const MissionListSection: React.FC<MissionListSectionProps> = ({
             e.stopPropagation();
             onToggleMissionComplete(mission.id);
           }}
-          className={`mt-3.5 w-full py-2 px-3 rounded-lg text-xs font-medium font-display transition-colors flex items-center justify-center gap-1.5 cursor-pointer border ${
+          className={`mt-3.5 w-full py-2 px-3 rounded-lg text-xs font-medium font-display transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
             isCompleted
-              ? 'bg-[#1D240B] border-[#4A6616] text-[#CCFF00]'
-              : 'bg-[#121110] hover:bg-[#1D1B18] border-[#2C2824] text-[#D8D3CA] hover:text-[#F5F3EF]'
+              ? 'bg-[#1D240B]/90 border border-[#4A6616] text-[#CCFF00]'
+              : 'glass-button-ghost text-[#D8D3CA] hover:text-[#F5F3EF]'
           }`}
         >
           {isCompleted ? (
@@ -118,7 +118,7 @@ export const MissionListSection: React.FC<MissionListSectionProps> = ({
             onToggleProUnlock();
           }
         }}
-        className="rounded-xl p-4 bg-[#131211] border border-[#1E1C1A] hover:border-[#2E2A25] transition-all cursor-pointer group"
+        className="rounded-xl p-4 glass-card-interactive cursor-pointer group"
       >
         {/* Top Row: Muted Title on Left | "Pro 🔒" Badge on Right */}
         <div className="flex items-start justify-between gap-2.5">
@@ -127,7 +127,7 @@ export const MissionListSection: React.FC<MissionListSectionProps> = ({
           </h3>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            <span className="px-2 py-0.5 rounded bg-[#23201D] border border-[#38332E] text-[10px] font-bold font-display text-[#C7C3BC]">
+            <span className="px-2 py-0.5 rounded glass-pill text-[10px] font-bold font-display text-[#C7C3BC]">
               Pro
             </span>
             <Lock className="w-3.5 h-3.5 text-[#8C8881] group-hover:text-[#FF5500] transition-colors" />
@@ -150,7 +150,7 @@ export const MissionListSection: React.FC<MissionListSectionProps> = ({
   return (
     <aside
       aria-labelledby="free-missions-heading"
-      className="bg-[#121110] border border-[#1E1C19] rounded-2xl p-4 sm:p-5 space-y-3.5 w-full"
+      className="glass-panel rounded-2xl p-4 sm:p-5 space-y-3.5 w-full"
     >
       {/* Column Header matching reference image */}
       <div className="flex items-center justify-between gap-2">

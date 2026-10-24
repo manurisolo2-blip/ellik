@@ -502,21 +502,26 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#0C0B0A] text-[#F5F3EF] flex flex-col relative selection:bg-[#FF5500] selection:text-[#0C0B0A] w-full">
-      {/* Subtle analog film grain overlay (3.8% opacity) */}
+      {/* Ambient Atmospheric Lighting & Grid Pattern for authentic Glassmorphism refraction */}
+      <div className="ellik-ambient-canvas" aria-hidden="true" />
+      <div className="ellik-grid-pattern" aria-hidden="true" />
+
+      {/* Subtle analog film grain overlay (3.2% opacity) */}
       <div className="ellik-film-grain" aria-hidden="true" />
 
-      {/* TOP NAVIGATION BAR — Full screen width with "ellik." and Cog Wheel "Ajustes" */}
-      <header className="sticky top-0 z-30 bg-[#0C0B0A]/95 backdrop-blur-md border-b border-[#1A1816] w-full">
-        <div className="w-full flex items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 py-3">
+      {/* TOP NAVIGATION BAR — Frosted Glassmorphism Header */}
+      <header className="sticky top-0 z-30 glass-header w-full">
+        <div className="w-full flex items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 py-3.5">
           <a
             href="#top"
             onClick={(e) => {
               e.preventDefault();
               setScreenMode(screenMode === 'report' ? 'scanner' : 'report');
             }}
-            className="text-2xl font-bold tracking-tight text-[#F5F3EF] font-display whitespace-nowrap shrink-0"
+            className="text-2xl font-bold tracking-tight text-[#F5F3EF] font-display whitespace-nowrap shrink-0 group flex items-center gap-1"
           >
-            ellik<span className="text-[#CCFF00]">.</span>
+            <span>ellik</span>
+            <span className="text-[#CCFF00] inline-block transition-transform group-hover:scale-125">.</span>
           </a>
 
           <div className="flex items-center gap-2.5 shrink-0">
@@ -527,7 +532,7 @@ export default function App() {
               disabled={isRunningLiveAi}
               title="Notificaciones y estado de motor Gemini Vision"
               aria-label="Notificaciones"
-              className="p-2 rounded-lg bg-[#141312] hover:bg-[#1A1816] border border-[#221F1C] hover:border-[#332E29] text-[#A6A29A] hover:text-[#F5F3EF] transition-colors cursor-pointer"
+              className="p-2.5 rounded-xl glass-button-ghost text-[#A6A29A] hover:text-[#F5F3EF] cursor-pointer"
             >
               <Bell className="w-4 h-4" />
             </button>
@@ -537,7 +542,7 @@ export default function App() {
               type="button"
               onClick={() => setShowSettingsModal(true)}
               aria-label="Ajustes de auditoría y configuración"
-              className="px-3.5 py-2 rounded-lg bg-[#141312] hover:bg-[#1A1816] border border-[#221F1C] hover:border-[#38332E] text-xs font-medium text-[#D8D3CA] hover:text-[#F5F3EF] transition-colors flex items-center gap-2 cursor-pointer group"
+              className="px-3.5 py-2 rounded-xl glass-button-ghost text-xs font-medium text-[#D8D3CA] hover:text-[#F5F3EF] flex items-center gap-2 cursor-pointer group"
             >
               <Settings className="w-4 h-4 text-[#A6A29A] group-hover:text-[#FF5500] transition-transform duration-500 group-hover:rotate-90 shrink-0" />
               <span>Ajustes</span>
@@ -556,20 +561,20 @@ export default function App() {
       />
 
       {screenMode === 'scanner' ? (
-        /* SCREEN 1: MODO ESCÁNER — Landing Page Principal */
+        /* SCREEN 1: MODO ESCÁNER — Landing Page Principal Glassmorphism */
         <main
           id="top"
           data-testid="scanner-screen"
-          className="flex-1 w-full max-w-[1160px] mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8"
+          className="flex-1 w-full max-w-[1160px] mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8 relative z-10"
         >
           <div className="flex items-center justify-between gap-4">
-            <div className="text-xs font-bold font-display text-[#FF5500] tracking-wider uppercase">
+            <div className="text-xs font-bold font-display text-[#FF5500] tracking-wider uppercase px-3 py-1 rounded-full glass-pill w-fit">
               Auditoría Visual de Conversión · Shopify · Tiendanube · WooCommerce · MercadoLibre
             </div>
             <button
               type="button"
               onClick={() => setScreenMode('report')}
-              className="px-3.5 py-1.5 rounded-lg bg-[#141312] border border-[#221F1C] text-xs font-medium text-[#E6E2DC] hover:border-[#FF5500] transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-xl glass-button-ghost text-xs font-medium text-[#E6E2DC] hover:text-[#F5F3EF] hover:border-[#FF5500] transition-colors cursor-pointer"
             >
               Ir a Modo Reporte →
             </button>
@@ -593,14 +598,14 @@ export default function App() {
             id="ejemplos-reales"
             className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-[#8C8881]"
           >
-            <span>Explorar diagnósticos pre-calibrados por plataforma:</span>
+            <span className="font-medium text-[#A6A29A]">Explorar diagnósticos pre-calibrados por plataforma:</span>
             <div className="flex flex-wrap items-center gap-2">
               {PRESET_STORE_CASES.map((preset) => (
                 <button
                   key={preset.id}
                   type="button"
                   onClick={() => handleLoadPresetDemo(preset)}
-                  className="px-3.5 py-2 rounded-xl bg-[#141312] border border-[#201D1A] text-[#C7C3BC] hover:text-[#F5F3EF] hover:border-[#332E29] transition-colors font-medium whitespace-nowrap shrink-0 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl glass-card-interactive text-[#C7C3BC] hover:text-[#F5F3EF] font-medium whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   Probar ejemplo {preset.platform}
                 </button>
@@ -609,11 +614,11 @@ export default function App() {
           </div>
         </main>
       ) : (
-        /* SCREEN 2: MODO REPORTE — Full-width 3-Column Cockpit */
+        /* SCREEN 2: MODO REPORTE — Full-width 3-Column Glassmorphism Cockpit */
         <main
           id="top"
           data-testid="report-screen"
-          className="flex-1 w-full px-3 sm:px-5 lg:px-6 py-4 space-y-4"
+          className="flex-1 w-full px-3 sm:px-5 lg:px-6 py-4 space-y-4 relative z-10"
         >
           {/* SUB-HEADER BAR: "← Auditar otra tienda" Left | "Modo Reporte" Center | Quick Actions Right */}
           <div className="grid grid-cols-3 items-center gap-4 pb-1">
@@ -621,7 +626,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setScreenMode('scanner')}
-                className="px-4 py-2 rounded-lg bg-[#141312] hover:bg-[#1A1816] border border-[#221F1C] text-xs font-medium text-[#E6E2DC] hover:text-[#F5F3EF] transition-colors flex items-center gap-2 whitespace-nowrap cursor-pointer"
+                className="px-4 py-2.5 rounded-xl glass-button-ghost text-xs font-medium text-[#E6E2DC] hover:text-[#F5F3EF] transition-colors flex items-center gap-2 whitespace-nowrap cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5 text-[#B8B3AA]" />
                 <span>Auditar otra tienda</span>
@@ -637,7 +642,7 @@ export default function App() {
             <div className="flex items-center justify-end gap-2.5">
               <span
                 data-testid="xp-counter"
-                className="hidden sm:inline-flex px-2.5 py-1 rounded-md bg-[#141312] border border-[#201D1A] text-[11px] font-bold font-display text-[#CCFF00]"
+                className="hidden sm:inline-flex px-3 py-1.5 rounded-xl glass-pill text-[11px] font-bold font-display text-[#CCFF00]"
               >
                 +{levelUp.earnedXp} / {levelUp.totalPossibleXp} XP
               </span>
@@ -646,7 +651,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setCompletedMissionIds([])}
-                  className="px-2.5 py-1.5 rounded-lg bg-[#141312] border border-[#201D1A] text-[11px] text-[#9E9A93] hover:text-[#F5F3EF] flex items-center gap-1 cursor-pointer"
+                  className="px-3 py-2 rounded-xl glass-button-ghost text-[11px] text-[#9E9A93] hover:text-[#F5F3EF] flex items-center gap-1 cursor-pointer"
                   title="Reiniciar progreso de misiones"
                 >
                   <RotateCcw className="w-3 h-3" />
@@ -658,7 +663,7 @@ export default function App() {
                 type="button"
                 onClick={handleReauditCurrentWithAi}
                 disabled={isRunningLiveAi}
-                className="px-3 py-1.5 rounded-lg bg-[#141312] hover:bg-[#1A1816] border border-[#201D1A] text-[11px] font-medium text-[#B8B3AA] hover:text-[#F5F3EF] disabled:opacity-50 transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-2 rounded-xl glass-button-ghost text-[11px] font-medium text-[#B8B3AA] hover:text-[#F5F3EF] disabled:opacity-50 transition-colors flex items-center gap-1.5 cursor-pointer"
               >
                 <RefreshCw className={`w-3 h-3 ${isRunningLiveAi ? 'animate-spin text-[#FF5500]' : ''}`} />
                 <span className="hidden sm:inline">
@@ -674,7 +679,7 @@ export default function App() {
             <section
               id="diagnostico-cro"
               aria-label="Telemetría y Score de Conversión"
-              className="lg:col-span-3 bg-[#121110] border border-[#1E1C19] rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-6 w-full"
+              className="lg:col-span-3 glass-panel rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-6 w-full"
             >
               <ConversionArcGauge
                 score={levelUp.projectedScore}
@@ -745,7 +750,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setShowCopywritingDrawer((prev) => !prev)}
-                className="text-xs font-semibold font-display text-[#9E9A93] hover:text-[#F5F3EF] transition-colors cursor-pointer"
+                className="text-xs font-semibold font-display text-[#D8D3CA] hover:text-[#F5F3EF] px-3 py-1.5 rounded-lg glass-button-ghost transition-colors cursor-pointer"
               >
                 {showCopywritingDrawer
                   ? 'Ocultar Pack de Copywriting IA ▲'
@@ -764,8 +769,8 @@ export default function App() {
         </main>
       )}
 
-      {/* Full-width Colophon Footer */}
-      <footer className="py-6 px-4 sm:px-6 lg:px-8 mt-8 border-t border-[#171513] w-full">
+      {/* Full-width Colophon Footer — Frosted Glass bar */}
+      <footer className="py-6 px-4 sm:px-6 lg:px-8 mt-8 border-t border-white/[0.06] bg-black/35 backdrop-blur-md w-full relative z-10">
         <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#78746D]">
           <div className="flex items-center gap-2">
             <span className="font-bold text-[#F5F3EF] font-display text-sm">
@@ -777,7 +782,7 @@ export default function App() {
           <button
             type="button"
             onClick={() => setScreenMode('scanner')}
-            className="hover:text-[#F5F3EF] transition-colors cursor-pointer"
+            className="hover:text-[#F5F3EF] transition-colors cursor-pointer px-3 py-1 rounded-lg glass-pill"
           >
             Auditar otra tienda
           </button>

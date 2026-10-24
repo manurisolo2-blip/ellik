@@ -36,17 +36,17 @@ export const CopywritingAndJsonPanel: React.FC<CopywritingAndJsonPanelProps> = (
     <section
       id="copywriting-pack-section"
       aria-labelledby="copy-pack-heading"
-      className="bg-[#161513] rounded-2xl p-6 sm:p-8 space-y-7"
+      className="glass-panel rounded-2xl p-6 sm:p-8 space-y-7"
     >
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <div className="text-xs text-[#CCFF00] font-bold font-display tracking-wide">
+          <div className="text-xs text-[#CCFF00] font-bold font-display tracking-wide px-2.5 py-0.5 rounded-full glass-pill w-fit">
             PSICOLOGÍA DE VENTAS · TEXTOS LISTOS PARA TU TIENDA
           </div>
           <h2
             id="copy-pack-heading"
-            className="text-xl sm:text-2xl font-bold text-[#F5F3EF] font-display mt-1"
+            className="text-xl sm:text-2xl font-bold text-[#F5F3EF] font-display mt-1.5"
           >
             Pack de Copywriting de Alta Conversión
           </h2>
@@ -57,8 +57,8 @@ export const CopywritingAndJsonPanel: React.FC<CopywritingAndJsonPanelProps> = (
           onClick={onToggleProUnlock}
           className={`px-4 py-2 text-xs font-bold font-display rounded-xl transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer ${
             proUnlocked
-              ? 'bg-[#0C0B0A] text-[#C7C3BC] hover:text-[#F5F3EF]'
-              : 'bg-[#FF5500] text-[#0C0B0A] hover:bg-[#FF6A1F]'
+              ? 'glass-button-ghost text-[#C7C3BC] hover:text-[#F5F3EF]'
+              : 'bg-[#FF5500] text-[#0C0B0A] hover:bg-[#FF6A1F] shadow-[0_4px_16px_rgba(255,85,0,0.3)]'
           }`}
         >
           {proUnlocked ? (
@@ -76,8 +76,8 @@ export const CopywritingAndJsonPanel: React.FC<CopywritingAndJsonPanelProps> = (
       </div>
 
       <div className="space-y-6">
-        {/* FREE SAMPLE: Optimized Product Title (Always Visible & Actionable, Unboxed Surface) */}
-        <div className="p-6 rounded-2xl bg-[#0C0B0A] space-y-2.5">
+        {/* FREE SAMPLE: Optimized Product Title */}
+        <div className="p-6 rounded-2xl glass-card space-y-2.5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2 text-xs font-display">
               <span className="text-[#CCFF00] font-bold">MUESTRA GRATUITA</span>
@@ -89,7 +89,7 @@ export const CopywritingAndJsonPanel: React.FC<CopywritingAndJsonPanelProps> = (
             <button
               type="button"
               onClick={() => handleCopy('title', pack.optimized_product_title)}
-              className="px-3 py-1.5 text-xs font-semibold text-[#F5F3EF] bg-[#161513] hover:bg-[#1E1C19] rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+              className="px-3 py-1.5 text-xs font-semibold text-[#F5F3EF] glass-button-ghost rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
             >
               {copiedKey === 'title' ? (
                 <>
@@ -112,7 +112,7 @@ export const CopywritingAndJsonPanel: React.FC<CopywritingAndJsonPanelProps> = (
           </p>
         </div>
 
-        {/* PRO LOCKED ZONE: 3 Bullet Benefits, Optimized CTA, and Trust Guarantee Microcopy */}
+        {/* PRO LOCKED ZONE */}
         <div className="relative rounded-2xl">
           <div
             data-testid="copywriting-pro-content"
@@ -124,7 +124,7 @@ export const CopywritingAndJsonPanel: React.FC<CopywritingAndJsonPanelProps> = (
             }`}
           >
             {/* 3 Bullet Benefits */}
-            <div className="p-6 rounded-2xl bg-[#0C0B0A] space-y-4">
+            <div className="p-6 rounded-2xl glass-card space-y-4">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-xs font-bold font-display text-[#9E9A93] tracking-wide">
                   3 VIÑETAS DE BENEFICIOS · TRANSFORMACIÓN, OBJECIÓN Y RAPIDEZ
@@ -138,7 +138,7 @@ export const CopywritingAndJsonPanel: React.FC<CopywritingAndJsonPanelProps> = (
                       pack.optimized_bullet_benefits.map((b) => `• ${b}`).join('\n')
                     )
                   }
-                  className="px-3 py-1.5 text-xs font-semibold text-[#F5F3EF] bg-[#161513] hover:bg-[#1E1C19] rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+                  className="px-3 py-1.5 text-xs font-semibold text-[#F5F3EF] glass-button-ghost rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   {copiedKey === 'bullets' ? (
                     <>
@@ -171,7 +171,7 @@ export const CopywritingAndJsonPanel: React.FC<CopywritingAndJsonPanelProps> = (
 
             {/* CTA Button Text & Trust Guarantee Microcopy */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="p-6 rounded-2xl bg-[#0C0B0A] space-y-3">
+              <div className="p-6 rounded-2xl glass-card space-y-3">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-bold font-display text-[#9E9A93]">
                     TEXTO PARA EL BOTÓN DE COMPRA (CTA)
@@ -180,7 +180,7 @@ export const CopywritingAndJsonPanel: React.FC<CopywritingAndJsonPanelProps> = (
                     type="button"
                     disabled={!proUnlocked}
                     onClick={() => handleCopy('cta', pack.optimized_cta_button_text)}
-                    className="px-3 py-1.5 text-xs font-semibold text-[#F5F3EF] bg-[#161513] hover:bg-[#1E1C19] rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+                    className="px-3 py-1.5 text-xs font-semibold text-[#F5F3EF] glass-button-ghost rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
                   >
                     {copiedKey === 'cta' ? (
                       <>
@@ -195,12 +195,12 @@ export const CopywritingAndJsonPanel: React.FC<CopywritingAndJsonPanelProps> = (
                     )}
                   </button>
                 </div>
-                <div className="py-3 px-4 rounded-xl bg-[#FF5500] text-[#0C0B0A] font-bold font-display text-sm text-center">
+                <div className="py-3 px-4 rounded-xl bg-[#FF5500] text-[#0C0B0A] font-bold font-display text-sm text-center shadow-[0_4px_16px_rgba(255,85,0,0.35)]">
                   {pack.optimized_cta_button_text}
                 </div>
               </div>
 
-              <div className="p-6 rounded-2xl bg-[#0C0B0A] space-y-3">
+              <div className="p-6 rounded-2xl glass-card space-y-3">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-bold font-display text-[#9E9A93]">
                     MICROCOPY DE GARANTÍA BAJO EL BOTÓN
@@ -209,7 +209,7 @@ export const CopywritingAndJsonPanel: React.FC<CopywritingAndJsonPanelProps> = (
                     type="button"
                     disabled={!proUnlocked}
                     onClick={() => handleCopy('trust', pack.trust_guarantee_microcopy)}
-                    className="px-3 py-1.5 text-xs font-semibold text-[#F5F3EF] bg-[#161513] hover:bg-[#1E1C19] rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+                    className="px-3 py-1.5 text-xs font-semibold text-[#F5F3EF] glass-button-ghost rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
                   >
                     {copiedKey === 'trust' ? (
                       <>
@@ -235,10 +235,10 @@ export const CopywritingAndJsonPanel: React.FC<CopywritingAndJsonPanelProps> = (
           {!proUnlocked && (
             <div
               data-testid="copywriting-pro-lock-overlay"
-              className="absolute inset-0 flex items-center justify-center p-4"
+              className="absolute inset-0 flex items-center justify-center p-4 backdrop-blur-[2px]"
             >
-              <div className="max-w-md w-full bg-[#161513] rounded-2xl p-7 text-center space-y-4 shadow-2xl">
-                <div className="w-11 h-11 rounded-full bg-[#0C0B0A] text-[#FF5500] flex items-center justify-center mx-auto">
+              <div className="max-w-md w-full glass-modal rounded-2xl p-7 text-center space-y-4">
+                <div className="w-11 h-11 rounded-full bg-white/[0.04] border border-white/[0.08] text-[#FF5500] flex items-center justify-center mx-auto">
                   <Lock className="w-5 h-5" />
                 </div>
                 <h3 className="text-base sm:text-lg font-bold text-[#F5F3EF] font-display">
@@ -250,7 +250,7 @@ export const CopywritingAndJsonPanel: React.FC<CopywritingAndJsonPanelProps> = (
                 <button
                   type="button"
                   onClick={onToggleProUnlock}
-                  className="w-full py-3 px-4 text-xs font-bold font-display bg-[#FF5500] text-[#0C0B0A] rounded-xl hover:bg-[#FF6A1F] transition-colors cursor-pointer"
+                  className="w-full py-3 px-4 text-xs font-bold font-display bg-[#FF5500] text-[#0C0B0A] rounded-xl hover:bg-[#FF6A1F] transition-colors cursor-pointer shadow-[0_6px_20px_rgba(255,85,0,0.35)]"
                 >
                   Desbloquear Pack Copywriting Pro Ahora
                 </button>

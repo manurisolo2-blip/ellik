@@ -222,12 +222,12 @@ export const ProductScreenshotInspector: React.FC<ProductScreenshotInspectorProp
   return (
     <section
       aria-label="Análisis Multimodal de Imagen"
-      className="bg-[#121110] border border-[#1E1C19] rounded-2xl p-4 sm:p-5 space-y-4 relative w-full"
+      className="glass-panel rounded-2xl p-4 sm:p-5 space-y-4 relative w-full"
     >
-      {/* Top HUD Frame Header (Matches "Análisis Multimodal de Imagen" + waveform + coordinates) */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-1 border-b border-[#1A1816]">
+      {/* Top HUD Frame Header with Frosted Glassmorphism */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
         <div className="flex items-center gap-3">
-          <div className="px-3.5 py-1.5 rounded-lg bg-[#161513] border border-[#24211E] text-xs font-medium text-[#E6E2DC]">
+          <div className="px-3.5 py-1.5 rounded-lg glass-pill text-xs font-medium text-[#E6E2DC]">
             Análisis Multimodal de Imagen
           </div>
 
@@ -264,7 +264,7 @@ export const ProductScreenshotInspector: React.FC<ProductScreenshotInspectorProp
           </span>
 
           <div
-            className="flex items-center gap-1 p-1 bg-[#0C0B0A] rounded-lg border border-[#1A1816]"
+            className="flex items-center gap-1 p-1 bg-black/40 backdrop-blur-md rounded-lg border border-white/[0.08]"
             role="group"
             aria-label="Modo de visualización de la página"
           >
@@ -448,7 +448,7 @@ export const ProductScreenshotInspector: React.FC<ProductScreenshotInspectorProp
           {/* Selected Pin Evidence & Action Strip right below the viewport */}
           <div
             data-testid="selected-pin-detail-card"
-            className="rounded-xl bg-[#151412] border border-[#201D1A] p-4 space-y-3"
+            className="rounded-xl glass-card p-4 space-y-3"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-2 text-xs font-display">
@@ -538,7 +538,7 @@ export const ProductScreenshotInspector: React.FC<ProductScreenshotInspectorProp
           className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch pt-1"
         >
           {/* Left Column (5 cols): ANTES */}
-          <div className="lg:col-span-5 rounded-xl bg-[#0C0B0A] p-4 flex flex-col justify-between space-y-4">
+          <div className="lg:col-span-5 rounded-xl glass-card p-4 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between text-[11px] font-display text-[#FF5500]">
                 <span className="font-bold">ANTES · ACTUAL</span>
@@ -546,7 +546,7 @@ export const ProductScreenshotInspector: React.FC<ProductScreenshotInspectorProp
               </div>
 
               {effectiveImageUrl && !imageLoadFailed && (
-                <div className="rounded-lg bg-[#161513] p-2 overflow-hidden max-h-36 flex items-center justify-center">
+                <div className="rounded-lg bg-black/40 border border-white/[0.06] p-2 overflow-hidden max-h-36 flex items-center justify-center">
                   <img
                     src={effectiveImageUrl}
                     alt={`Estado original de ${realProductName}`}
@@ -583,7 +583,7 @@ export const ProductScreenshotInspector: React.FC<ProductScreenshotInspectorProp
           </div>
 
           {/* Right Column (7 cols): DESPUÉS */}
-          <div className="lg:col-span-7 rounded-xl bg-[#1C1A17] p-4 flex flex-col justify-between space-y-4">
+          <div className="lg:col-span-7 rounded-xl glass-card border-l-2 border-l-[#CCFF00]/40 p-4 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between text-[11px] font-display text-[#CCFF00]">
                 <span className="font-bold">DESPUÉS · OPTIMIZADO CRO</span>

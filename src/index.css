@@ -44,13 +44,158 @@
   }
 }
 
-/* Subtle analog film grain overlay (3.8% opacity) */
+/* Atmospheric Ambient Depth for Glassmorphism Refraction */
+.ellik-ambient-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.ellik-ambient-canvas::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  left: 8%;
+  width: 580px;
+  height: 580px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 85, 0, 0.055) 0%, rgba(255, 85, 0, 0.012) 50%, transparent 70%);
+  filter: blur(48px);
+}
+
+.ellik-ambient-canvas::after {
+  content: '';
+  position: absolute;
+  bottom: 2%;
+  right: 6%;
+  width: 640px;
+  height: 640px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(204, 255, 0, 0.032) 0%, rgba(204, 255, 0, 0.008) 50%, transparent 70%);
+  filter: blur(56px);
+}
+
+.ellik-grid-pattern {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.28;
+  background-size: 36px 36px;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 40%, #000 40%, transparent 95%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 40%, #000 40%, transparent 95%);
+}
+
+/* Subtle analog film grain overlay (3.2% opacity) */
 .ellik-film-grain {
   pointer-events: none;
   position: fixed;
   inset: 0;
   z-index: 50;
-  opacity: 0.038;
+  opacity: 0.032;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* =========================================================================
+   Glassmorphism Surfaces & Components
+   ========================================================================= */
+
+.glass-header {
+  background: rgba(12, 11, 10, 0.72);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.4), inset 0 -1px 0 0 rgba(255, 255, 255, 0.03);
+}
+
+.glass-panel {
+  background: rgba(18, 17, 16, 0.65);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 16px 36px -8px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(22, 20, 19, 0.52);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow:
+    0 8px 24px -4px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+}
+
+.glass-card-interactive {
+  background: rgba(22, 20, 19, 0.52);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow:
+    0 8px 24px -4px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card-interactive:hover {
+  background: rgba(28, 25, 23, 0.72);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 12px 32px -4px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+.glass-input {
+  background: rgba(12, 11, 10, 0.68);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.35);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-input:focus {
+  border-color: #FF5500;
+  box-shadow: 0 0 0 1px #FF5500, inset 0 1px 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-button-ghost {
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.glass-button-ghost:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+.glass-modal {
+  background: rgba(16, 15, 14, 0.82);
+  backdrop-filter: blur(28px) saturate(150%);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow:
+    0 24px 64px -8px rgba(0, 0, 0, 0.75),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
 }

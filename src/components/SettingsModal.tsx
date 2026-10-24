@@ -111,17 +111,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="settings-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm select-none"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md select-none"
       onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg rounded-2xl bg-[#121110] border border-[#26221E] p-6 space-y-6 text-[#F5F3EF] shadow-2xl"
+        className="w-full max-w-lg glass-modal p-6 space-y-6 text-[#F5F3EF]"
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-[#1E1C1A]">
+        <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#181614] border border-[#2C2722] flex items-center justify-center text-[#FF5500]">
+            <div className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.08] backdrop-blur-md flex items-center justify-center text-[#FF5500]">
               <Settings className="w-4 h-4" />
             </div>
             <div>
@@ -137,14 +137,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[#8C8881] hover:text-[#F5F3EF] hover:bg-[#1A1816] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-[#8C8881] hover:text-[#F5F3EF] hover:bg-white/[0.06] transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Server Status Section */}
-        <div className="p-4 rounded-xl bg-[#171513] border border-[#24201C] space-y-3 text-xs">
+        <div className="p-4 rounded-xl bg-black/40 border border-white/[0.08] backdrop-blur-md space-y-3 text-xs">
           <div className="flex items-center justify-between">
             <span className="text-[#8C8881]">Servidor Vercel Serverless:</span>
             {serverStatus.loading ? (
@@ -180,7 +180,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <div className="space-y-1.5">
             <label
               htmlFor="custom-gemini-key-input"
-              className="block text-xs font-semibold text-[#E6E2DC] font-display flex items-center justify-between"
+              className="text-xs font-semibold text-[#E6E2DC] font-display flex items-center justify-between"
             >
               <span className="flex items-center gap-1.5">
                 <Key className="w-3.5 h-3.5 text-[#FF5500]" />
@@ -206,11 +206,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               value={inputKey}
               onChange={(e) => setInputKey(e.target.value)}
               placeholder="Pega aquí tu clave: AIzaSy... o AQ...."
-              className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#0C0B0A] border border-[#26221E] text-xs text-[#F5F3EF] placeholder:text-[#5E5B54] focus:outline-none focus:ring-1 focus:ring-[#FF5500]"
+              className="flex-1 px-3.5 py-2.5 rounded-xl glass-input text-xs text-[#F5F3EF] placeholder:text-[#5E5B54] focus:outline-none focus:ring-1 focus:ring-[#FF5500]"
             />
             <button
               type="submit"
-              className="px-4 py-2.5 rounded-xl bg-[#FF5500] hover:bg-[#FF661A] text-[#0C0B0A] text-xs font-bold font-display transition-colors cursor-pointer shrink-0"
+              className="px-4 py-2.5 rounded-xl bg-[#FF5500] hover:bg-[#FF661A] text-[#0C0B0A] text-xs font-bold font-display transition-colors cursor-pointer shrink-0 shadow-[0_0_15px_rgba(255,85,0,0.25)]"
             >
               Guardar
             </button>
@@ -219,7 +219,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 type="button"
                 onClick={handleRemoveKey}
                 title="Eliminar clave guardada"
-                className="p-2.5 rounded-xl bg-[#1A1816] hover:bg-[#25211D] text-[#8C8881] hover:text-[#FF5500] border border-[#26221E] transition-colors cursor-pointer shrink-0"
+                className="p-2.5 rounded-xl glass-button-ghost text-[#8C8881] hover:text-[#FF5500] transition-colors cursor-pointer shrink-0"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -232,14 +232,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </form>
 
         {/* Quick Nav Actions */}
-        <div className="pt-2 border-t border-[#1E1C1A] space-y-2">
+        <div className="pt-2 border-t border-white/[0.06] space-y-2">
           <button
             type="button"
             onClick={() => {
               onClose();
               onOpenCopywriting();
             }}
-            className="w-full py-2.5 px-3.5 rounded-xl bg-[#181614] hover:bg-[#201D1A] border border-[#26221E] text-xs font-semibold font-display text-[#D8D3CA] hover:text-[#F5F3EF] transition-colors flex items-center justify-between cursor-pointer"
+            className="w-full py-2.5 px-3.5 rounded-xl glass-card-interactive text-xs font-semibold font-display text-[#D8D3CA] hover:text-[#F5F3EF] transition-colors flex items-center justify-between cursor-pointer"
           >
             <span>Ver Pack de Copywriting IA &amp; JSON</span>
             <span>→</span>
@@ -251,7 +251,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               onClose();
               onToggleScreenMode();
             }}
-            className="w-full py-2.5 px-3.5 rounded-xl bg-[#181614] hover:bg-[#201D1A] border border-[#26221E] text-xs font-semibold font-display text-[#D8D3CA] hover:text-[#F5F3EF] transition-colors flex items-center justify-between cursor-pointer"
+            className="w-full py-2.5 px-3.5 rounded-xl glass-card-interactive text-xs font-semibold font-display text-[#D8D3CA] hover:text-[#F5F3EF] transition-colors flex items-center justify-between cursor-pointer"
           >
             <span>Cambiar a {screenMode === 'report' ? 'Modo Escáner' : 'Modo Reporte'}</span>
             <span>→</span>
@@ -262,7 +262,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-[#1E1C1A] hover:bg-[#282420] text-[#D8D3CA] hover:text-[#F5F3EF] text-xs font-semibold font-display transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl glass-button-ghost text-[#D8D3CA] hover:text-[#F5F3EF] text-xs font-semibold font-display transition-colors cursor-pointer"
           >
             Listo
           </button>

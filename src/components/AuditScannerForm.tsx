@@ -359,9 +359,9 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
   };
 
   return (
-    <div className="bg-[#141312] border border-[#221F1C] rounded-2xl p-6 sm:p-9 space-y-8 w-full">
+    <div className="glass-panel rounded-2xl p-6 sm:p-9 space-y-8 w-full">
       <form onSubmit={handleSubmit} className="space-y-8" noValidate>
-        {/* Platform Selector */}
+        {/* Platform Selector with Frosted Glass Pills */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <label className="block text-sm font-semibold text-[#F5F3EF] font-display tracking-tight">
@@ -372,7 +372,7 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
             </p>
           </div>
           <div
-            className="flex flex-wrap items-center gap-1.5 p-1.5 bg-[#0C0B0A] rounded-xl w-fit"
+            className="flex flex-wrap items-center gap-1.5 p-1.5 bg-black/40 backdrop-blur-md border border-white/[0.08] rounded-xl w-fit"
             role="group"
             aria-label="Seleccionar plataforma de e-commerce"
           >
@@ -381,10 +381,10 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
                 key={p}
                 type="button"
                 onClick={() => setPlatform(p)}
-                className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                   platform === p
-                    ? 'bg-[#FF5500] text-[#0C0B0A]'
-                    : 'text-[#A6A29A] hover:text-[#F5F3EF]'
+                    ? 'bg-[#FF5500] text-[#0C0B0A] shadow-[0_2px_10px_rgba(255,85,0,0.35)]'
+                    : 'text-[#A6A29A] hover:text-[#F5F3EF] hover:bg-white/[0.05]'
                 }`}
               >
                 {p}
@@ -393,9 +393,9 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
           </div>
         </div>
 
-        {/* Main Input Grid: Upload Screenshot OR Paste Store URL (No vertical divider line) */}
+        {/* Main Input Grid: Upload Screenshot OR Paste Store URL */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-7">
-          {/* Left: Screenshot Dropzone */}
+          {/* Left: Screenshot Dropzone Glass Card */}
           <div className="lg:col-span-6 flex flex-col">
             <label
               htmlFor="screenshot-upload-input"
@@ -413,12 +413,12 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
             />
 
             {imagePreview ? (
-              <div className="relative flex-1 min-h-[220px] rounded-xl bg-[#0C0B0A] p-5 flex flex-col items-center justify-center gap-3.5">
+              <div className="relative flex-1 min-h-[220px] rounded-xl bg-black/40 border border-white/[0.09] backdrop-blur-md p-5 flex flex-col items-center justify-center gap-3.5">
                 <img
                   src={imagePreview}
                   alt="Vista previa de captura cargada"
                   referrerPolicy="no-referrer"
-                  className="max-h-44 w-auto object-contain rounded-lg"
+                  className="max-h-44 w-auto object-contain rounded-lg shadow-lg"
                 />
                 <div className="flex items-center gap-4 text-xs">
                   <span className="text-[#CCFF00] font-semibold inline-flex items-center gap-1.5">
@@ -441,9 +441,9 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex-1 min-h-[220px] rounded-xl bg-[#0C0B0A] hover:bg-[#11100E] p-7 flex flex-col items-center justify-center gap-3 text-center transition-colors cursor-pointer group"
+                className="flex-1 min-h-[220px] rounded-xl bg-white/[0.02] hover:bg-white/[0.04] border border-white/[0.07] hover:border-white/[0.14] backdrop-blur-md p-7 flex flex-col items-center justify-center gap-3 text-center transition-all cursor-pointer group shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
               >
-                <div className="w-12 h-12 rounded-full bg-[#161513] group-hover:bg-[#1E1C19] flex items-center justify-center text-[#FF5500] transition-colors">
+                <div className="w-12 h-12 rounded-full bg-white/[0.04] group-hover:bg-[#FF5500]/10 border border-white/[0.08] group-hover:border-[#FF5500]/40 flex items-center justify-center text-[#FF5500] transition-all">
                   <Upload className="w-5 h-5" />
                 </div>
                 <span className="text-sm font-semibold text-[#F5F3EF]">
@@ -479,7 +479,7 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
                     if (validationError) setValidationError(null);
                   }}
                   placeholder="https://mitienda.com/products/mi-producto"
-                  className="w-full pl-11 pr-4 py-3 text-sm bg-[#0C0B0A] rounded-xl text-[#F5F3EF] placeholder:text-[#66625B] focus:outline-none focus:ring-1 focus:ring-[#FF5500]"
+                  className="w-full pl-11 pr-4 py-3 text-sm rounded-xl glass-input text-[#F5F3EF] placeholder:text-[#66625B] focus:outline-none"
                 />
               </div>
             </div>
@@ -502,7 +502,7 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
                     if (validationError) setValidationError(null);
                   }}
                   placeholder="Pega aquí la descripción actual, precio o detalles sobre tu embudo..."
-                  className="w-full pl-11 pr-4 py-3 text-sm bg-[#0C0B0A] rounded-xl text-[#F5F3EF] placeholder:text-[#66625B] focus:outline-none focus:ring-1 focus:ring-[#FF5500]"
+                  className="w-full pl-11 pr-4 py-3 text-sm rounded-xl glass-input text-[#F5F3EF] placeholder:text-[#66625B] focus:outline-none"
                 />
               </div>
             </div>
@@ -512,7 +512,7 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
         {validationError && (
           <div
             role="alert"
-            className="p-4 rounded-xl bg-[#261310] text-xs text-[#FFB4A2] flex items-center gap-2.5"
+            className="p-4 rounded-xl bg-[#261310]/85 border border-[#FF5500]/30 backdrop-blur-md text-xs text-[#FFB4A2] flex items-center gap-2.5"
           >
             <AlertCircle className="w-4 h-4 text-[#FF5500] shrink-0" />
             <span>{validationError}</span>
@@ -523,7 +523,7 @@ export const AuditScannerForm: React.FC<AuditScannerFormProps> = ({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-4 px-6 text-sm font-bold bg-[#FF5500] text-[#0C0B0A] rounded-xl hover:bg-[#FF6A1F] disabled:opacity-60 transition-colors flex items-center justify-center gap-2.5 cursor-pointer"
+            className="w-full py-4 px-6 text-sm font-bold bg-[#FF5500] hover:bg-[#FF6A1F] text-[#0C0B0A] rounded-xl disabled:opacity-60 transition-all flex items-center justify-center gap-2.5 cursor-pointer shadow-[0_8px_24px_rgba(255,85,0,0.32),inset_0_1px_0_rgba(255,255,255,0.22)]"
           >
             {isSubmitting ? (
               <>
