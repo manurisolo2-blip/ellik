@@ -521,10 +521,9 @@ export default function App() {
               e.preventDefault();
               setScreenMode(screenMode === 'report' ? 'scanner' : 'report');
             }}
-            className="text-2xl font-bold tracking-tight text-white font-display whitespace-nowrap shrink-0 group flex items-center gap-1"
+            className="text-2xl font-bold tracking-tight text-white font-display whitespace-nowrap shrink-0 group flex items-center cursor-pointer"
           >
             <span>ellik</span>
-            <span className="text-[#38BDF8] inline-block transition-transform group-hover:scale-125">.</span>
           </a>
 
           <div className="flex items-center gap-2.5 shrink-0">
@@ -607,9 +606,6 @@ export default function App() {
                 Detecta por qué tu tienda online pierde ventas y reescribe tu jerarquía visual, botones y garantías con inteligencia artificial.
               </p>
             </div>
-
-            {/* Thin Glass Divider Line */}
-            <div className="glass-divider" />
 
             {/* Bottom Meta Row */}
             <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-white/70">
@@ -807,11 +803,9 @@ export default function App() {
       <footer className="py-6 px-4 sm:px-6 lg:px-8 mt-8 border-t border-white/[0.06] bg-black/35 backdrop-blur-md w-full relative z-10">
         <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#78746D]">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-[#F5F3EF] font-display text-sm">
-              ellik<span className="text-[#CCFF00]">.</span>
+            <span className="font-bold text-white font-display text-sm">
+              ellik
             </span>
-            <span aria-hidden="true">·</span>
-            <span>Auditoría Visual de Conversión &amp; UI/UX para E-Commerce</span>
           </div>
           <button
             type="button"

@@ -66,7 +66,7 @@ export function generatePresetCanvasBase64(preset: PresetStoreCase): string {
     // Center store brand in navbar
     ctx.font = 'bold 22px "Space Grotesk", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('ellik.', 480, 62);
+    ctx.fillText('ellik', 480, 62);
 
     // Sub-links under brand
     ctx.font = '500 11px "Plus Jakarta Sans", sans-serif';
