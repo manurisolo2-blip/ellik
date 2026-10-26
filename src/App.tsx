@@ -31,6 +31,7 @@ import { MissionListSection } from './components/MissionListSection';
 import { CopywritingAndJsonPanel } from './components/CopywritingAndJsonPanel';
 import { AuditScannerForm } from './components/AuditScannerForm';
 import { SettingsModal, LOCAL_STORAGE_GEMINI_KEY } from './components/SettingsModal';
+import { PerspectiveTunnelHero } from './components/ui/perspective-tunnel-hero';
 
 /**
  * 240° Precision Arc Gauge with crisp matte styling (Zero artificial blur or neon glows).
@@ -574,55 +575,51 @@ export default function App() {
         <main
           id="top"
           data-testid="scanner-screen"
-          className="flex-1 w-full max-w-[1160px] mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8 relative z-10"
+          className="flex-1 w-full max-w-[1240px] mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-10 relative z-10"
         >
-          {/* HERO GLASS CARD (Composition styled directly like the user reference) */}
-          <section className="glass-panel p-6 sm:p-10 space-y-6 max-w-4xl mx-auto">
-            {/* Top Tag Row */}
-            <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-3">
-                <span className="glass-pill px-3.5 py-1 text-white font-medium">
-                  Fácil de Usar
-                </span>
-                <span className="text-white/70 hidden sm:inline">Modos Claro &amp; Oscuro</span>
-                <span className="text-white/70 hidden md:inline">Auditoría Visual CRO</span>
+          {/* 3D Perspective Tunnel Hero */}
+          <PerspectiveTunnelHero
+            badgeText="Auditoría Visual CRO"
+            titleFirstLine="AUDITORÍA"
+            titleSecondLine="VISUAL CRO"
+            description="Explora en 3D las páginas de producto auditadas. Desliza tu rueda o trackpad para volar por el túnel o haz clic para cargar un caso real."
+            onExploreClick={() => {
+              document.getElementById('escaner-form')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            onCardSelect={(_item, idx) => {
+              if (PRESET_STORE_CASES[idx]) {
+                handleLoadPresetDemo(PRESET_STORE_CASES[idx]);
+              }
+            }}
+          />
+
+          {/* Form Section */}
+          <div id="escaner-form" className="space-y-6 pt-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <h2 className="text-2xl sm:text-3xl font-bold font-display text-white tracking-tight">
+                  Escanea tu Tienda Online
+                </h2>
+                <p className="text-sm text-white/70">
+                  Sube una captura de tu página de producto o pega su URL para auditarla en vivo con IA.
+                </p>
               </div>
+
               <button
                 type="button"
                 onClick={() => setScreenMode('report')}
-                className="glass-pill-interactive px-3.5 py-1 text-xs text-white flex items-center gap-1.5 cursor-pointer"
+                className="glass-pill-interactive px-4 py-2 text-xs text-white font-medium flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
               >
                 <span>Ver Modo Reporte</span>
                 <span>→</span>
               </button>
             </div>
 
-            {/* Main Headline */}
-            <div className="space-y-1">
-              <h1 className="text-4xl sm:text-6xl font-bold text-white font-display tracking-tight leading-[1.04]">
-                Auditoría<br />Visual CRO
-              </h1>
-              <p className="text-sm sm:text-base text-white/70 pt-2 max-w-2xl leading-relaxed">
-                Detecta por qué tu tienda online pierde ventas y reescribe tu jerarquía visual, botones y garantías con inteligencia artificial.
-              </p>
-            </div>
-
-            {/* Bottom Meta Row */}
-            <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-white/70">
-              <span className="font-medium">Inspección Píxel por Píxel</span>
-              <div className="flex items-center gap-2">
-                <span className="glass-pill px-2.5 py-0.5 text-[11px]">Shopify</span>
-                <span className="glass-pill px-2.5 py-0.5 text-[11px]">Tiendanube</span>
-                <span className="glass-pill px-2.5 py-0.5 text-[11px]">WooCommerce</span>
-                <span className="glass-pill px-2.5 py-0.5 text-[11px]">MercadoLibre</span>
-              </div>
-            </div>
-          </section>
-
-          <AuditScannerForm
-            defaultPlatform={activePlatform}
-            onAuditCompleted={handleCustomAuditCompleted}
-          />
+            <AuditScannerForm
+              defaultPlatform={activePlatform}
+              onAuditCompleted={handleCustomAuditCompleted}
+            />
+          </div>
 
           <div
             id="ejemplos-reales"
