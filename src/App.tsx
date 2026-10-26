@@ -514,7 +514,7 @@ export default function App() {
       <div className="ellik-film-grain" aria-hidden="true" />
 
       {/* TOP NAVIGATION BAR — Frosted Glassmorphism Header */}
-      <header className="sticky top-0 z-30 glass-header w-full">
+      <header className="fixed top-0 inset-x-0 z-40 glass-header w-full">
         <div className="w-full flex items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 py-3.5">
           <a
             href="#top"
@@ -575,68 +575,73 @@ export default function App() {
         <main
           id="top"
           data-testid="scanner-screen"
-          className="flex-1 w-full max-w-[1240px] mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-10 relative z-10"
+          className="flex-1 w-full flex flex-col relative z-10"
         >
-          {/* 3D Perspective Tunnel Hero */}
-          <PerspectiveTunnelHero
-            badgeText="Auditoría Visual CRO"
-            titleFirstLine="AUDITORÍA"
-            titleSecondLine="VISUAL CRO"
-            description="Explora en 3D las páginas de producto auditadas. Desliza tu rueda o trackpad para volar por el túnel o haz clic para cargar un caso real."
-            onExploreClick={() => {
-              document.getElementById('escaner-form')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-            onCardSelect={(_item, idx) => {
-              if (PRESET_STORE_CASES[idx]) {
-                handleLoadPresetDemo(PRESET_STORE_CASES[idx]);
-              }
-            }}
-          />
+          {/* Full-bleed 3D Perspective Tunnel Hero (100vw x 100vh) */}
+          <section className="w-full h-screen sm:h-[100svh] relative">
+            <PerspectiveTunnelHero
+              badgeText="Auditoría Visual CRO"
+              titleFirstLine="AUDITORÍA"
+              titleSecondLine="VISUAL CRO"
+              description="Explora en 3D las páginas de producto auditadas. Desliza tu rueda o trackpad para volar por el túnel o haz clic para cargar un caso real."
+              onExploreClick={() => {
+                document.getElementById('escaner-form')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              onCardSelect={(_item, idx) => {
+                if (PRESET_STORE_CASES[idx]) {
+                  handleLoadPresetDemo(PRESET_STORE_CASES[idx]);
+                }
+              }}
+            />
+          </section>
 
-          {/* Form Section */}
-          <div id="escaner-form" className="space-y-6 pt-2">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <h2 className="text-2xl sm:text-3xl font-bold font-display text-white tracking-tight">
-                  Escanea tu Tienda Online
-                </h2>
-                <p className="text-sm text-white/70">
-                  Sube una captura de tu página de producto o pega su URL para auditarla en vivo con IA.
-                </p>
+          {/* Form & Diagnostics Section below the Hero */}
+          <div className="w-full max-w-[1240px] mx-auto px-4 sm:px-6 py-12 sm:py-16 space-y-10">
+            {/* Form Section */}
+            <div id="escaner-form" className="scroll-mt-24 space-y-6 pt-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <h2 className="text-2xl sm:text-3xl font-bold font-display text-white tracking-tight">
+                    Escanea tu Tienda Online
+                  </h2>
+                  <p className="text-sm text-white/70">
+                    Sube una captura de tu página de producto o pega su URL para auditarla en vivo con IA.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setScreenMode('report')}
+                  className="glass-pill-interactive px-4 py-2 text-xs text-white font-medium flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                >
+                  <span>Ver Modo Reporte</span>
+                  <span>→</span>
+                </button>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setScreenMode('report')}
-                className="glass-pill-interactive px-4 py-2 text-xs text-white font-medium flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
-              >
-                <span>Ver Modo Reporte</span>
-                <span>→</span>
-              </button>
+              <AuditScannerForm
+                defaultPlatform={activePlatform}
+                onAuditCompleted={handleCustomAuditCompleted}
+              />
             </div>
 
-            <AuditScannerForm
-              defaultPlatform={activePlatform}
-              onAuditCompleted={handleCustomAuditCompleted}
-            />
-          </div>
-
-          <div
-            id="ejemplos-reales"
-            className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-white/70"
-          >
-            <span className="font-medium text-white/80">Explorar diagnósticos pre-calibrados por plataforma:</span>
-            <div className="flex flex-wrap items-center gap-2">
-              {PRESET_STORE_CASES.map((preset) => (
-                <button
-                  key={preset.id}
-                  type="button"
-                  onClick={() => handleLoadPresetDemo(preset)}
-                  className="px-4 py-2 rounded-full glass-pill-interactive text-white font-medium whitespace-nowrap shrink-0 cursor-pointer"
-                >
-                  Probar {preset.platform}
-                </button>
-              ))}
+            <div
+              id="ejemplos-reales"
+              className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-white/70"
+            >
+              <span className="font-medium text-white/80">Explorar diagnósticos pre-calibrados por plataforma:</span>
+              <div className="flex flex-wrap items-center gap-2">
+                {PRESET_STORE_CASES.map((preset) => (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => handleLoadPresetDemo(preset)}
+                    className="px-4 py-2 rounded-full glass-pill-interactive text-white font-medium whitespace-nowrap shrink-0 cursor-pointer"
+                  >
+                    Probar {preset.platform}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </main>
@@ -645,7 +650,7 @@ export default function App() {
         <main
           id="top"
           data-testid="report-screen"
-          className="flex-1 w-full px-3 sm:px-5 lg:px-6 py-4 space-y-4 relative z-10"
+          className="flex-1 w-full px-3 sm:px-5 lg:px-6 pt-20 pb-4 space-y-4 relative z-10"
         >
           {/* SUB-HEADER BAR: "← Auditar otra tienda" Left | "Modo Reporte" Center | Quick Actions Right */}
           <div className="grid grid-cols-3 items-center gap-4 pb-1">

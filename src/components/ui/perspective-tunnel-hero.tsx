@@ -100,8 +100,8 @@ function TunnelCard({ card, progress, pointer, total, stage, onCardSelect }: Tun
     const opacity = useTransform(localProgress, [0, 0.18, 0.82, 0.98], [0, 1, 1, 0]);
 
     const cardWidth = stage.isMobile
-        ? Math.max(130, Math.min(180, stage.width * 0.38))
-        : Math.max(180, Math.min(270, stage.width * 0.18));
+        ? Math.max(140, Math.min(220, stage.width * 0.42))
+        : Math.max(200, Math.min(320, stage.width * 0.20));
 
     const baseX = card.angleCos * (stage.width * card.radiusFactorX);
     const baseY = card.angleSin * (stage.height * card.radiusFactorY);
@@ -224,7 +224,11 @@ export function PerspectiveTunnelHero({
         if (!el) return;
 
         const handleWheel = (e: WheelEvent) => {
-            // Only capture if within progress bounds, allowing normal page scroll at edges
+            // If user has scrolled down into the page, let standard scrolling happen
+            if (window.scrollY > 20 && e.deltaY < 0) {
+                return;
+            }
+
             const current = rawProgress.get();
             const delta = e.deltaY * 0.0008;
             const next = current + delta;
@@ -239,6 +243,37 @@ export function PerspectiveTunnelHero({
         return () => el.removeEventListener("wheel", handleWheel);
     }, [rawProgress]);
 
+    // Handle touch scrolling for mobile trackpad / screens
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+
+        let startY = 0;
+        const handleTouchStart = (e: TouchEvent) => {
+            startY = e.touches[0].clientY;
+        };
+
+        const handleTouchMove = (e: TouchEvent) => {
+            if (window.scrollY > 20) return;
+            const currentY = e.touches[0].clientY;
+            const diffY = startY - currentY;
+            const current = rawProgress.get();
+            const delta = diffY * 0.0012;
+            const next = current + delta;
+
+            if (next >= 0 && next <= 1) {
+                rawProgress.set(Math.min(1, Math.max(0, next)));
+            }
+        };
+
+        el.addEventListener("touchstart", handleTouchStart, { passive: true });
+        el.addEventListener("touchmove", handleTouchMove, { passive: true });
+        return () => {
+            el.removeEventListener("touchstart", handleTouchStart);
+            el.removeEventListener("touchmove", handleTouchMove);
+        };
+    }, [rawProgress]);
+
     const pointer = useCameraParallax(!reduce);
 
     const titleScale = useTransform(smoothProgress, [0, 0.5, 1], [0.85, 1, 1.25]);
@@ -248,7 +283,7 @@ export function PerspectiveTunnelHero({
     return (
         <div
             ref={containerRef}
-            className={`relative min-h-[85vh] sm:h-[92svh] w-full overflow-hidden bg-[#060913] text-white select-none flex items-center justify-center rounded-[32px] border border-white/15 shadow-[0_32px_80px_-16px_rgba(0,0,0,0.8)] backdrop-blur-2xl ${className}`}
+            className={`relative h-screen sm:h-[100svh] w-full overflow-hidden bg-[#060913] text-white select-none flex items-center justify-center border-0 rounded-none shadow-none ${className}`}
             style={{
                 perspective: stage.isMobile ? "900px" : "1200px",
                 transformStyle: "preserve-3d",
@@ -293,7 +328,14 @@ export function PerspectiveTunnelHero({
             {/* Scroll Prompt */}
             <motion.div
                 style={{ opacity: promptOpacity }}
-                className="pointer-events-none absolute bottom-8 z-20 flex flex-col items-center gap-2 text-xs font-mono uppercase tracking-[0.3em] text-white/60"
+                onClick={() => {
+                    if (onExploreClick) {
+                        onExploreClick();
+                    } else {
+                        document.getElementById('escaner-form')?.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }}
+                className="pointer-events-auto absolute bottom-8 z-20 flex flex-col items-center gap-2 text-xs font-mono uppercase tracking-[0.3em] text-white/60 cursor-pointer hover:text-white transition-colors"
             >
                 <span>Desliza para Navegar</span>
                 <div className="h-6 w-px bg-gradient-to-b from-[#38BDF8] to-transparent animate-pulse" />
